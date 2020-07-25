@@ -1,0 +1,23 @@
+{
+    "name": "hgod/hgodbee-react",
+    "type": "library",
+    "authors": [{
+        "name": "Henrique Godinho",
+        "email": "hnrq.godinho@gmail.com"
+    }],
+    "repositories": [{
+            "type": "vcs",
+            "url": "https://github.com/hgodinho/classes.git"
+        }
+    ],
+    "require": {
+        "hgod/classes": "dev-master",
+        "twbs/bootstrap": "4.5.0"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.6",
+        "phpcompatibility/phpcompatibility-wp": "*",
+        "wp-coding-standards/wpcs": "^0.14.0",
+        "automattic/vipwpcs": "*"
+    }
+}
