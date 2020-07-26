@@ -10,8 +10,10 @@ if (is_user_logged_in()) {
     $notification   = include plugin_dir_path(__FILE__) . 'parts/bee-plugin-notification.php';
     $container      = include plugin_dir_path(__FILE__) . 'parts/bee-plugin-container.php';
     $modals         = include plugin_dir_path(__FILE__) . 'parts/bee-plugin-modals.php';
-
+    $navbar         = include plugin_dir_path(__FILE__) . 'parts/bee-plugin-navbar.php';
+    hgobee_navbar();
     hgodbee_beeplugin_notification_area();
+    $hgodbee_action = get_query_var('action');
 
     $client    = get_option($config['prefix'] . 'settings_name');
     $uid       = $client['hgodbee_uid'];
@@ -23,11 +25,35 @@ if (is_user_logged_in()) {
 
     hgodbee_plugin_container();
     hgodbee_modal_template_save();
-    hgodbee_modal_send_test();
+    //hgodbee_modal_send_test();
 
-    $template = get_the_content();
+    /*
+    $args = array(
+        'taxonomy' => 'category',
+        'orderby'  => 'name',
+        'order'    => 'ASC',
+    );
+    $terms = new WP_Term_Query($args);
+    echo '<ul>';
+    foreach ( $terms->get_terms() as $term ) {
+        echo "<li>" . $term->name . '</li>';
+    }
+    echo '</ul>';
+    HGodBee::hb_var_dump('teste', __CLASS__, __METHOD__, __LINE__, true);
+    */
 
-    hgodbee_plugin_starter($tokenJSON, $uid, $template);
+    if ('edit' === $hgodbee_action) {
+        $template = get_the_content();
+        hgodbee_plugin_starter($tokenJSON, $uid, $template);
+    }
+    if ('view' === $hgodbee_action) {
+        $html = get_post_meta(get_the_ID(), $config['prefix'] . 'saved_html');
+        if (isset($html[0])) {
+            echo '<div class="container">';
+            echo $html[0];
+            echo '</div>';
+        }
+    }
 
 } else {
     global $wp_query;

@@ -26,8 +26,9 @@ require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-loads.php';
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-cpt.php';
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-tax.php';
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-admin.php';
-require dirname(__FILE__) . '/inc/page-templater/pagetemplater.php';
 require dirname(__FILE__) . '/inc/beefree/BeeFree.php';
+
+//$ajax_functions = include 'functions/hgodbee-ajax.php';
 
 /**
  * Classe principal
@@ -171,18 +172,17 @@ class HGodBee {
             $this->set_loads();
         }
 
-        if (class_exists('PageTemplater')) {
-            $this->set_template_page();
-        }
-
         $slug_exists = $this->the_slug_exists('bee-email-editor', 'page');
         //HGodBee::hb_var_dump($slug_exists, __CLASS__, __METHOD__, __LINE__, true);
         if (!$slug_exists) {
             $this->on_activation();
         }
 
-        add_action('wp_ajax_token_bee', array($this, 'token_bee'));
         add_action('wp_ajax_hgodbee_save_template', array($this, 'hgodbee_save_template'));
+        add_action('wp_ajax_hgodbee_save', array($this, 'hgodbee_save'));
+        add_action('wp_ajax_hgodbee_token', array($this, 'hgodbee_token'));
+
+        add_filter('query_vars', array($this, 'custom_query_vars'));
 
         //register_activation_hook(__FILE__, array($this, 'on_activation'));
         //register_deactivation_hook(__FILE__, array($this, 'emakbee_desativacao'));
@@ -256,6 +256,17 @@ class HGodBee {
     }
 
     /**
+     * Custom query vars
+     *
+     * @param array $qvars
+     * @return array $qvars modified with included query vars
+     */
+    public function custom_query_vars($qvars) {
+        $qvars[] = 'action';
+        return $qvars;
+    }
+
+    /**
      * AJAX FUNTIONS!
      */
     /**
@@ -265,7 +276,7 @@ class HGodBee {
      *
      * @return void
      */
-    public function token_bee() {
+    public function hgodbee_token() {
         $nonce = check_ajax_referer($this->config['prefix'] . 'admin', 'nonce');
         global $wpdb;
         $options       = get_option($this->admin['settings']['option_name']);
@@ -293,14 +304,14 @@ class HGodBee {
     public function hgodbee_save_template() {
         $nonce = check_ajax_referer($this->config['prefix'] . 'save_as_template', 'nonce');
         global $wpdb;
-        $json_template = $_POST['json'];
-        $template_name = $_POST['name'];
+        $json_template        = $_POST['json'];
+        $template_name        = $_POST['name'];
         $template_description = $_POST['dsc'];
-        $cpt = $this->cpt['name'];
-        if( post_exists($template_name) ){
-            $page_id = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_title = '".$template_name."' AND post_type = '".$cpt."'");
+        $cpt                  = $this->cpt['name'];
+        if (post_exists($template_name)) {
+            $page_id         = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_title = '" . $template_name . "' AND post_type = '" . $cpt . "'");
             $template_update = array(
-                'ID' => $page_id,
+                'ID'           => $page_id,
                 'post_content' => $json_template,
                 'post_excerpt' => $template_description,
             );
@@ -309,17 +320,71 @@ class HGodBee {
             echo 'Template atualizado com sucesso: </strong>';
             echo $template_name . '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
         } else {
-            if ( current_user_can('edit_posts') ){
+            if (current_user_can('edit_posts')) {
                 $saved = wp_insert_post(array(
                     'post_content' => $json_template,
-                    'post_title' => $template_name,
-                    'post_excerpt' =>  $template_description,
-                    'post_status' => 'publish',
-                    'post_type' => $cpt,
-                    ),
+                    'post_title'   => $template_name,
+                    'post_excerpt' => $template_description,
+                    'post_status'  => 'publish',
+                    'post_type'    => $cpt,
+                )
                 );
                 HGodBee::hb_log($saved, $cpt, __CLASS__, __METHOD__, __LINE__);
                 echo '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>';
+                echo 'Template criado com sucesso: </strong>';
+                echo $template_name . '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+            } else {
+                echo 'sem permissão';
+            }
+        }
+        delete_transient('emakbee_autosave');
+        delete_transient('emakbee_user');
+        wp_die();
+    }
+
+    public function hgodbee_save() {
+        $nonce = check_ajax_referer($this->config['prefix'] . 'save', 'nonce');
+        global $wpdb;
+        $json_template        = $_POST['json'];
+        $html_file            = $_POST['html'];
+        $template_name        = $_POST['name'];
+        $template_description = $_POST['dsc'];
+        $categories           = $_POST['categories'];
+        $cpt                  = $this->cpt['name'];
+        if (post_exists($template_name)) {
+            $page_id         = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_title = '" . $template_name . "' AND post_type = '" . $cpt . "'");
+            $template_update = array(
+                'ID'           => $page_id,
+                'post_content' => $json_template,
+                'post_excerpt' => $template_description,
+            );
+            $saved      = wp_update_post($template_update); // return (int|WP_Error) The post ID on success. The value 0 or WP_Error on failure.
+            $saved_html = update_post_meta($saved, $this->config['prefix'] . 'saved_html', $html_file); //return(int|bool) The new meta field ID if a field with the given key didn't exist and was therefore added, true on successful update, false on failure.
+            foreach ($categories as $category) {
+                if (!term_exists($category, $this->config['prefix'] . 'tax')) {
+                    $term_added   = wp_insert_term($category, $this->config['prefix'] . 'tax'); // return (array|WP_Error) An array containing the term_id and term_taxonomy_id, WP_Error otherwise.
+                    $term_related = wp_set_object_terms($saved, $term_added['term_id'], $this->config['prefix'] . 'tax', true); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
+                } else {
+                    $term         = get_term_by('name', $category, $this->config['prefix'] . 'tax');
+                    $term_related = wp_set_object_terms($saved, $term->term_id, $this->config['prefix'] . 'tax', true); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
+                }
+            }
+
+            echo '<div class="alert alert-success alert-dismissible fade show" data-dismiss="alert" role="alert"><strong>';
+            echo 'Template atualizado com sucesso: </strong>';
+            echo $template_name . '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+        } else {
+            if (current_user_can('edit_posts')) {
+                $saved = wp_insert_post(array(
+                    'post_content' => $json_template,
+                    'post_title'   => $template_name,
+                    'post_excerpt' => $template_description,
+                    'post_status'  => 'publish',
+                    'post_type'    => $cpt,
+                )
+                );
+                $saved_html = update_post_meta($saved, $this->config['prefix'] . 'saved_html', $html_file);
+                echo '<div class="alert alert-success alert-dismissible fade show" data-dismiss="alert" role="alert"><strong>';
                 echo 'Template criado com sucesso: </strong>';
                 echo $template_name . '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
             } else {
@@ -341,21 +406,6 @@ class HGodBee {
         //$email      = $this->new_post($email_page);
         $post = wp_insert_post($email_page);
         HGodBee::hb_log($post, 'serasefoi');
-    }
-
-    /**
-     * Set Template Page
-     *
-     * Define os templates page que serão adicionados no plugin.
-     *
-     * @return void
-     */
-    public function set_template_page() {
-        $args = array(
-            'beeeditor-template-page.php' => 'Bee_editor hgod classe',
-        );
-        $path          = plugin_dir_path(__FILE__);
-        $page_template = new PageTemplater($args, $path);
     }
 
     /**
@@ -620,7 +670,7 @@ class HGodBee {
         $url = get_post_type_archive_link($this->cpt['name']);
         ?>
         <div class="wrap">
-            <div id="notification_area">
+            <div id="notification-area">
             </div>
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1><small><?php echo esc_html(HB_VERSION); ?></small>
 

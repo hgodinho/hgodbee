@@ -3,12 +3,13 @@
  *
  * @author hgodinho
  */
-//import { toPng } from 'html-to-image';
 
 var token = hgodbee_object.token;
 console.log(token);
 var ajaxURL = hgodbee_object.ajax_url;
-//var plugindir = emakbee_infos.plugin_dir;
+
+jQuery('.hgodbee-tooltip').tooltip({placement : 'left'});
+
 
 function getBeeConfig(user_or_account_id, container_id) {
 	return {
@@ -21,9 +22,6 @@ function getBeeConfig(user_or_account_id, container_id) {
 }
 
 function BeeApp(token, bee_config, beetemplates) {
-	// @god mudar client_id e client_secret para token
-	console.log(beetemplates);
-
 	BeeApp.singleton = this;
 	BeeApp.singleton.callbacks = {};
 	var that = this;
@@ -79,14 +77,7 @@ function BeeApp(token, bee_config, beetemplates) {
 			doc.body.appendChild(iframe);
 
 			iframe.contentWindow.document.body.innerHTML = html;
-			/*
-      html2canvas(iframe.contentWindow.document.body, {
-        onrendered: function (canvas) {
-          callback(canvas.toDataURL("image/png"));
-          doc.body.removeChild(iframe);
-        },
-      });
-      */
+
 			domtoimage
 				.toPng(html)
 				.then(function (dataUrl) {
@@ -108,7 +99,9 @@ function BeeApp(token, bee_config, beetemplates) {
 	}
 
 	function BeeCallbacks(app, bee_config) {
+		
 		this.app = app;
+
 		bee_config.onLoad = function () {
 			app.onLoadEditor();
 		};
@@ -127,7 +120,7 @@ function BeeApp(token, bee_config, beetemplates) {
 		}),
 
 		// VAI MUDAR PARA onExport = function(htmlFile) {}
-		(bee_config.onSave = function (jsonFile, htmlFile) { 
+		/*(bee_config.onSave = function (jsonFile, htmlFile) { 
 			window.localStorage.setItem('save.json', jsonFile);
 			var zip = new JSZip();
 			var currentdate = new Date();
@@ -150,6 +143,47 @@ function BeeApp(token, bee_config, beetemplates) {
 				type: 'blob',
 			}).then(function (content) {
 				saveAs(content, archivename + '.zip');
+			});
+		}),
+		*/
+		(bee_config.onSave = function (jsonFile, htmlFile) { 
+			jQuery('#templateSave').modal('show');
+			jQuery('select.dropdown').dropdown();
+			jQuery('#salvarTemplateBTN').click(function () {
+				var templateName = document.getElementById('nomeTemplate')
+					.value;
+				var templateDescription = document.getElementById(
+					'descricaoTemplate'
+				).value;
+				var categories = jQuery('#categoriasTemplate').val();
+				if (templateName == '') {
+					alert('O Nome precisa ser preenchido.');
+					return false;
+				} else {
+					var data = {
+						action: 'hgodbee_save',
+						name: templateName,
+						dsc: templateDescription,
+						json: jsonFile,
+						html: htmlFile,
+						categories: categories,
+						nonce: hgodbee_object.nonce_save,
+					};
+					jQuery
+						.post(ajaxURL, data, function (response) {
+							//alert(response);
+							//that.spinner.show();
+							var notificationArea = document.getElementById(
+								'notification-area'
+							);
+							notificationArea.innerHTML = response;
+							that.spinner.hide();
+						})
+						.done(function() {
+							that.spinner.show();
+							jQuery('#templateSave').modal('hide');
+						});
+				}
 			});
 		}),
 
@@ -378,7 +412,7 @@ function BeeApp(token, bee_config, beetemplates) {
 	}
 
 
-	this.html_processor = new HTMLProcessor();
+	//this.html_processor = new HTMLProcessor();
 	this.callbacks = new BeeCallbacks(this, bee_config);
 	this.spinner = new Spinner();
 	//this.toolbar = new BeeToolbar(this.pluginContainer);
