@@ -1,6 +1,8 @@
 <?php
 
+
 function hgodbee_modal_template_save() {
+    $config = include dirname(plugin_dir_path( __FILE__ ), 2) . '/config/config.php';
     global $post;
     if ('comece-do-zero' === $post->post_name ) {
         $title = '';
@@ -18,7 +20,7 @@ function hgodbee_modal_template_save() {
         <form id="salvaTemplateForm" class="ui form">
             <div class="field">
                 <label for="nomeTemplate"><strong>Nome do template</strong></label>
-                <input type="text" class="form-control" id="nomeTemplate" value="<?php echo $title?>" required>
+                <input type="text" class="form-control" name="nomeTemplate" id="nomeTemplate" value="<?php echo $title?>" required>
             </div>
 
             <div class="field">
@@ -31,20 +33,41 @@ function hgodbee_modal_template_save() {
                     $terms = new WP_Term_Query($args);
                 ?>
                 <label>Categorias</label>
-                <select multiple id="categoriasTemplate" class="ui search dropdown">
+                <?php
+                    $used_terms = get_the_terms( $post->ID, $config['prefix'] . 'tax' );
+                    $terms_in_use = array();
+                    foreach ( $used_terms as $used_term ){
+                        array_push($terms_in_use, $used_term->name );
+                    }
+                ?>
+                <select multiple id="categoriasTemplate" class="ui search dropdown"
+                    data-categories="<?php print_r($terms_in_use); ?>">
                     <option value="">Selecione categorias</options>
-                    <?php
+                        <?php
                     foreach ( $terms->get_terms() as $term ) {
-                        echo '<option value="' . $term->name . '">' . $term->name . '</options>';
+                        if ( in_array( $term->name, $terms_in_use ) ){
+                            echo '<option value="' . $term->name . '" selected>' . $term->name . '</options>';
+                        } else {
+                            echo '<option value="' . $term->name . '">' . $term->name . '</options>';   
+                        }
                     }
                     ?>
                 </select>
             </div>
 
             <div class="field">
-                <label for="descricaoTemplate"><strong>Descrição</strong></label>
-                <textarea class="form-control" id="descricaoTemplate" required></textarea>
+                <?php
+                $tags_in_use = array();
+                $tags       = wp_get_post_terms(get_the_ID(), $config['prefix'] . 'tag');
+                foreach ( $tags as $tag ) {
+                    array_push($tags_in_use, $tag->name);
+                }
+                $tags_list = implode(', ', $tags_in_use);
+                ?>
+                <label for="tagsTemplate"><strong>Tags</strong></label>
+                <input type="text" class="form-control" name="tagsTemplate" id="tagsTemplate" value="<?php echo $tags_list; ?> " required>
             </div>
+
         </form>
     </div>
     <div class="actions">

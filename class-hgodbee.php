@@ -3,7 +3,7 @@
  * @wordpress-plugin
  * Plugin Name: HGodBee
  * Description: Integração do beeplugin com o wordpress.org
- * Version: 0.2.0
+ * Version: 0.3.0
  * Author: hgodinho
  * Author URI: hgodinho.com
  * Text Domain: hgodbee
@@ -27,6 +27,7 @@ require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-cpt.php';
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-tax.php';
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-admin.php';
 require dirname(__FILE__) . '/inc/beefree/BeeFree.php';
+require_once dirname(__FILE__) . '/templates/parts/bee-plugin-notification.php';
 
 //$ajax_functions = include 'functions/hgodbee-ajax.php';
 
@@ -173,7 +174,6 @@ class HGodBee {
         }
 
         $slug_exists = $this->the_slug_exists('bee-email-editor', 'page');
-        //HGodBee::hb_var_dump($slug_exists, __CLASS__, __METHOD__, __LINE__, true);
         if (!$slug_exists) {
             $this->on_activation();
         }
@@ -301,6 +301,9 @@ class HGodBee {
         wp_die();
     }
 
+    /**
+     * Salva template
+     */
     public function hgodbee_save_template() {
         $nonce = check_ajax_referer($this->config['prefix'] . 'save_as_template', 'nonce');
         global $wpdb;
@@ -316,9 +319,7 @@ class HGodBee {
                 'post_excerpt' => $template_description,
             );
             wp_update_post($template_update);
-            echo '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>';
-            echo 'Template atualizado com sucesso: </strong>';
-            echo $template_name . '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+            hgodbee_beeplugin_notification('Template atulizado com sucesso', $template_name, 'teal');
         } else {
             if (current_user_can('edit_posts')) {
                 $saved = wp_insert_post(array(
@@ -329,12 +330,9 @@ class HGodBee {
                     'post_type'    => $cpt,
                 )
                 );
-                HGodBee::hb_log($saved, $cpt, __CLASS__, __METHOD__, __LINE__);
-                echo '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>';
-                echo 'Template criado com sucesso: </strong>';
-                echo $template_name . '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+                hgodbee_beeplugin_notification('Template criado com sucesso', $template_name, 'green');
             } else {
-                echo 'sem permissão';
+                hgodbee_beeplugin_notification('Você não tem permissão para fazer isso.', $template_name, 'orange');
             }
         }
         delete_transient('emakbee_autosave');
@@ -345,51 +343,160 @@ class HGodBee {
     public function hgodbee_save() {
         $nonce = check_ajax_referer($this->config['prefix'] . 'save', 'nonce');
         global $wpdb;
-        $json_template        = $_POST['json'];
-        $html_file            = $_POST['html'];
-        $template_name        = $_POST['name'];
-        $template_description = $_POST['dsc'];
-        $categories           = $_POST['categories'];
-        $cpt                  = $this->cpt['name'];
-        if (post_exists($template_name)) {
-            $page_id         = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_title = '" . $template_name . "' AND post_type = '" . $cpt . "'");
-            $template_update = array(
-                'ID'           => $page_id,
-                'post_content' => $json_template,
-                'post_excerpt' => $template_description,
-            );
-            $saved      = wp_update_post($template_update); // return (int|WP_Error) The post ID on success. The value 0 or WP_Error on failure.
-            $saved_html = update_post_meta($saved, $this->config['prefix'] . 'saved_html', $html_file); //return(int|bool) The new meta field ID if a field with the given key didn't exist and was therefore added, true on successful update, false on failure.
-            foreach ($categories as $category) {
-                if (!term_exists($category, $this->config['prefix'] . 'tax')) {
-                    $term_added   = wp_insert_term($category, $this->config['prefix'] . 'tax'); // return (array|WP_Error) An array containing the term_id and term_taxonomy_id, WP_Error otherwise.
-                    $term_related = wp_set_object_terms($saved, $term_added['term_id'], $this->config['prefix'] . 'tax', true); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
-                } else {
-                    $term         = get_term_by('name', $category, $this->config['prefix'] . 'tax');
-                    $term_related = wp_set_object_terms($saved, $term->term_id, $this->config['prefix'] . 'tax', true); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
-                }
-            }
+        $json_template = $_POST['json'];
+        $html_file     = $_POST['html'];
+        $template_name = $_POST['name'];
+        //$template_description = $_POST['dsc'];
+        $categories = $_POST['categories'];
+        $tags       = $_POST['tags'];
+        $cpt        = $this->cpt['name'];
 
-            echo '<div class="alert alert-success alert-dismissible fade show" data-dismiss="alert" role="alert"><strong>';
-            echo 'Template atualizado com sucesso: </strong>';
-            echo $template_name . '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
-        } else {
-            if (current_user_can('edit_posts')) {
-                $saved = wp_insert_post(array(
+        if (current_user_can('edit_posts')) {
+            if (post_exists($template_name)) {
+                /**
+                 * ATUALIZA O TEMPLATE
+                 */
+                $page_id         = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_title = '" . $template_name . "' AND post_type = '" . $cpt . "'");
+                $template_update = array(
+                    'ID'           => $page_id,
                     'post_content' => $json_template,
-                    'post_title'   => $template_name,
-                    'post_excerpt' => $template_description,
-                    'post_status'  => 'publish',
-                    'post_type'    => $cpt,
-                )
+                    //'post_excerpt' => $template_description,
                 );
-                $saved_html = update_post_meta($saved, $this->config['prefix'] . 'saved_html', $html_file);
-                echo '<div class="alert alert-success alert-dismissible fade show" data-dismiss="alert" role="alert"><strong>';
-                echo 'Template criado com sucesso: </strong>';
-                echo $template_name . '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+                $saved = wp_update_post($template_update); // return (int|WP_Error) The post ID on success. The value 0 or WP_Error on failure.
+
+                /**
+                 * Salva o HTML no meta field
+                 */
+                $saved_html = update_post_meta($saved, $this->config['prefix'] . 'saved_html', $html_file); //return(int|bool) The new meta field ID if a field with the given key didn't exist and was therefore added, true on successful update, false on failure.
+
+                /**
+                 * Adiciona e relaciona as categorias ao post que acabamos de adicionar
+                 *
+                 * Aqui primeiro criamos um array para armazernar as ids dos termos
+                 * depois interagimos no loop verificando se elas já existem no banco
+                 * de dados, se não existirem, adicionamos e colocamos a ID dos termos
+                 * no array criado anteriormente. Se o termo já existe, somente iserimos
+                 * a ID do termo no array $terms_id. Por fim relacionamos o o array com
+                 * o template criado anteriormente.
+                 */
+                $terms_id = array();
+                foreach ($categories as $category) {
+                    if (!term_exists($category, $this->config['prefix'] . 'tax')) {
+                        $term_added = wp_insert_term($category, $this->config['prefix'] . 'tax'); // return (array|WP_Error) An array containing the term_id and term_taxonomy_id, WP_Error otherwise.
+                        array_push($terms_id, $term_added['term_id']);
+                    } else {
+                        $term = get_term_by('name', $category, $this->config['prefix'] . 'tax');
+                        array_push($terms_id, $term->term_id);
+                    }
+                }
+                $term_related = wp_set_object_terms($saved, $terms_id, $this->config['prefix'] . 'tax', false); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
+
+                /**
+                 * Adiciona e relaciona as tags ao post que acabamos de adicionar
+                 *
+                 * Aqui primeiro criamos um array para armazernar as ids dos termos
+                 * depois interagimos no loop verificando se elas já existem no banco
+                 * de dados, se não existirem, adicionamos e colocamos a ID dos termos
+                 * no array criado anteriormente. Se o termo já existe, somente iserimos
+                 * a ID do termo no array $tags_id. Por fim relacionamos o o array com
+                 * o template criado anteriormente.
+                 */
+                $tags_id = array();
+                foreach ($tags as $tag) {
+                    if (!term_exists($tag['value'], $this->config['prefix'] . 'tag')) {
+                        $tag_added = wp_insert_term($tag['value'], $this->config['prefix'] . 'tag'); // return (array|WP_Error) An array containing the term_id and term_taxonomy_id, WP_Error otherwise.
+                        array_push($tags_id, $tag_added['term_id']);
+                    } else {
+                        $tag = get_term_by('name', $tag['value'], $this->config['prefix'] . 'tag');
+                        array_push($tags_id, $tag->term_id);
+                    }
+                }
+                $tag_related = wp_set_object_terms($saved, $tags_id, $this->config['prefix'] . 'tag', false); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
+
+                /**
+                 * Resposta Ajax
+                 *
+                 * @see templates/parts/bee-plugin-notification.php
+                 */
+                hgodbee_beeplugin_notification('Template atulizado com sucesso', $template_name, 'teal');
+
             } else {
-                echo 'sem permissão';
+                /**
+                 * INSERE O TEMPLATE
+                 */
+                $saved = wp_insert_post(
+                    array(
+                        'post_content' => $json_template,
+                        'post_title'   => $template_name,
+                        //'post_excerpt' => $template_description,
+                        'post_status'  => 'publish',
+                        'post_type'    => $cpt,
+                    )
+                );
+
+                /**
+                 * Salva o HTML no metafield
+                 */
+                $saved_html = update_post_meta($saved, $this->config['prefix'] . 'saved_html', $html_file);
+
+                /**
+                 * Adiciona e relaciona as categorias ao post que acabamos de adicionar
+                 *
+                 * Aqui primeiro criamos um array para armazernar as ids dos termos
+                 * depois interagimos no loop verificando se elas já existem no banco
+                 * de dados, se não existirem, adicionamos e colocamos a ID dos termos
+                 * no array criado anteriormente. Se o termo já existe, somente iserimos
+                 * a ID do termo no array $terms_id. Por fim relacionamos o o array com
+                 * o template criado anteriormente.
+                 */
+                $terms_id = array();
+                foreach ($categories as $category) {
+                    if (!term_exists($category, $this->config['prefix'] . 'tax')) {
+                        $term_added = wp_insert_term($category, $this->config['prefix'] . 'tax'); // return (array|WP_Error) An array containing the term_id and term_taxonomy_id, WP_Error otherwise.
+                        array_push($terms_id, $term_added['term_id']);
+                    } else {
+                        $term = get_term_by('name', $category, $this->config['prefix'] . 'tax');
+                        array_push($terms_id, $term->term_id);
+                    }
+                }
+                $term_related = wp_set_object_terms($saved, $terms_id, $this->config['prefix'] . 'tax', false); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
+
+                /**
+                 * Adiciona e relaciona as tags ao post que acabamos de adicionar
+                 *
+                 * Aqui primeiro criamos um array para armazernar as ids dos termos
+                 * depois interagimos no loop verificando se elas já existem no banco
+                 * de dados, se não existirem, adicionamos e colocamos a ID dos termos
+                 * no array criado anteriormente. Se o termo já existe, somente iserimos
+                 * a ID do termo no array $tags_id. Por fim relacionamos o o array com
+                 * o template criado anteriormente.
+                 */
+                $tags_id = array();
+                foreach ($tags as $tag) {
+                    if (!term_exists($tag['value'], $this->config['prefix'] . 'tag')) {
+                        $tag_added = wp_insert_term($tag['value'], $this->config['prefix'] . 'tag'); // return (array|WP_Error) An array containing the term_id and term_taxonomy_id, WP_Error otherwise.
+                        array_push($tags_id, $tag_added['term_id']);
+                    } else {
+                        $tag = get_term_by('name', $tag['value'], $this->config['prefix'] . 'tag');
+                        array_push($tags_id, $tag->term_id);
+                    }
+                }
+                $tag_related = wp_set_object_terms($saved, $tags_id, $this->config['prefix'] . 'tag', false); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
+
+                /**
+                 * Resposta Ajax
+                 *
+                 * @see templates/parts/bee-plugin-notification.php
+                 */
+                hgodbee_beeplugin_notification('Template criado com sucesso', $template_name, 'green');
             }
+        } else {
+            /**
+             * Resposta Ajax
+             *
+             * @see templates/parts/bee-plugin-notification.php
+             */
+            hgodbee_beeplugin_notification('Você não tem permissão para fazer isso.', $template_name, 'orange');
         }
         delete_transient('emakbee_autosave');
         delete_transient('emakbee_user');
@@ -514,7 +621,6 @@ class HGodBee {
             ),
         );
         $admin = new HGod_Admin($args);
-        //HGodBee::hb_var_dump($admin, __CLASS__, __METHOD__, __LINE__, true);
     }
 
     /**
@@ -571,7 +677,9 @@ class HGodBee {
                     ),
                     'supports'     => array('title', 'editor', 'revisions', 'author', 'excerpt', 'page-attributes', 'thumbnail', 'custom-fields'),
                     'taxonomies'   => array($this->tax['name'], $this->tag['name']),
+                    'public'       => false,
                     'show_in_menu' => false,
+
                 ),
             ),
         );

@@ -5,11 +5,24 @@
  */
 
 var token = hgodbee_object.token;
-console.log(token);
 var ajaxURL = hgodbee_object.ajax_url;
+var input_tags;
 
-jQuery('.hgodbee-tooltip').tooltip({placement : 'left'});
-
+(function ($) {
+	$(document).ready(function () {
+		$(document).delegate('.message .close', 'click', function () {
+			$(this).closest('.message').transition('fade');
+		});
+		input_tags = $('input[name=tagsTemplate]')
+			.tagify()
+			.on('add', function (e, tagName) {
+				console.log(tagName);
+			})
+			.on('invalid', function (e, tagName) {
+				console.log(e);
+			});
+	});
+})(jQuery);
 
 function getBeeConfig(user_or_account_id, container_id) {
 	return {
@@ -99,7 +112,6 @@ function BeeApp(token, bee_config, beetemplates) {
 	}
 
 	function BeeCallbacks(app, bee_config) {
-		
 		this.app = app;
 
 		bee_config.onLoad = function () {
@@ -118,9 +130,8 @@ function BeeApp(token, bee_config, beetemplates) {
 				console.log(response);
 			});
 		}),
-
-		// VAI MUDAR PARA onExport = function(htmlFile) {}
-		/*(bee_config.onSave = function (jsonFile, htmlFile) { 
+			// VAI MUDAR PARA onExport = function(htmlFile) {}
+			/*(bee_config.onSave = function (jsonFile, htmlFile) { 
 			window.localStorage.setItem('save.json', jsonFile);
 			var zip = new JSZip();
 			var currentdate = new Date();
@@ -146,116 +157,109 @@ function BeeApp(token, bee_config, beetemplates) {
 			});
 		}),
 		*/
-		(bee_config.onSave = function (jsonFile, htmlFile) { 
-			jQuery('#templateSave').modal('show');
-			jQuery('select.dropdown').dropdown();
-			jQuery('#salvarTemplateBTN').click(function () {
-				var templateName = document.getElementById('nomeTemplate')
-					.value;
-				var templateDescription = document.getElementById(
-					'descricaoTemplate'
-				).value;
-				var categories = jQuery('#categoriasTemplate').val();
-				if (templateName == '') {
-					alert('O Nome precisa ser preenchido.');
-					return false;
-				} else {
-					var data = {
-						action: 'hgodbee_save',
-						name: templateName,
-						dsc: templateDescription,
-						json: jsonFile,
-						html: htmlFile,
-						categories: categories,
-						nonce: hgodbee_object.nonce_save,
-					};
-					jQuery
-						.post(ajaxURL, data, function (response) {
-							//alert(response);
-							//that.spinner.show();
-							var notificationArea = document.getElementById(
-								'notification-area'
-							);
-							notificationArea.innerHTML = response;
-							that.spinner.hide();
-						})
-						.done(function() {
-							that.spinner.show();
-							jQuery('#templateSave').modal('hide');
-						});
-				}
+			(bee_config.onSave = function (jsonFile, htmlFile) {
+				jQuery('#templateSave').modal('show');
+				jQuery('select.dropdown').dropdown();
+				jQuery('#salvarTemplateBTN').click(function () {
+					var templateName = document.getElementById('nomeTemplate')
+						.value;
+					var categories = jQuery('#categoriasTemplate').val();
+					if (templateName == '') {
+						alert('O Nome precisa ser preenchido.');
+						return false;
+					} else {
+						var data = {
+							action: 'hgodbee_save',
+							name: templateName,
+							json: jsonFile,
+							html: htmlFile,
+							categories: categories,
+							tags: input_tags.data('tagify').value,
+							nonce: hgodbee_object.nonce_save,
+						};
+						jQuery
+							.post(ajaxURL, data, function (response) {
+								//alert(response);
+								//that.spinner.show();
+								var notificationArea = document.getElementById(
+									'notification-area'
+								);
+								notificationArea.innerHTML = response;
+								that.spinner.hide();
+							})
+							.done(function () {
+								that.spinner.show();
+								jQuery('#templateSave').modal('hide');
+							});
+					}
+				});
+			}),
+			(bee_config.onSaveAsTemplate = function (jsonFile) {
+				jQuery('#templateSave').modal('show');
+				jQuery('#salvarTemplateBTN').click(function () {
+					var templateName = document.getElementById('nomeTemplate')
+						.value;
+					var templateDescription = document.getElementById(
+						'descricaoTemplate'
+					).value;
+
+					if (templateName == '' || templateDescription == '') {
+						alert('Os campos precisam ser preenchidos.');
+						return false;
+					} else {
+						var data = {
+							action: 'hgodbee_save_template',
+							name: templateName,
+							dsc: templateDescription,
+							json: jsonFile,
+							nonce: hgodbee_object.nonce_save_as_template,
+						};
+						jQuery
+							.post(ajaxURL, data, function (response) {
+								//alert(response);
+								var notificationArea = document.getElementById(
+									'notification-area'
+								);
+								notificationArea.innerHTML = response;
+							})
+							.done(jQuery('#templateSave').modal('hide'));
+					}
+				});
+			}),
+			(bee_config.onSend = function (htmlFile) {
+				jQuery('#enviaTeste').modal('show');
+				jQuery('#enviaTesteBTN').click(function () {
+					var contatos = document.getElementById('enderecoEnvio')
+						.value;
+					var assunto = document.getElementById('assuntoEnvio').value;
+					//var html = JSON.stringify("{'num':" + htmlFile + "}");
+
+					if (contatos == '' || assunto == '') {
+						alert('Os campos precisam ser preenchidos.');
+						return false;
+					} else {
+						var data = {
+							action: 'emakbee_envia_teste',
+							contatos: contatos,
+							assunto: assunto,
+							html: htmlFile,
+							nonce: emakbee_infos.nonce_enviateste,
+						};
+						jQuery
+							.post(ajaxURL, data, function (response) {
+								//alert(response);
+								var notificationArea = document.getElementById(
+									'notificationArea'
+								);
+								notificationArea.innerHTML = response;
+							})
+							.done(jQuery('#enviaTeste').modal('hide'));
+					}
+				});
+			}),
+			(bee_config.onError = function (errorMessage) {
+				app.onError(errorMessage);
 			});
-		}),
-
-		(bee_config.onSaveAsTemplate = function (jsonFile) {
-			jQuery('#templateSave').modal('show');
-			jQuery('#salvarTemplateBTN').click(function () {
-				var templateName = document.getElementById('nomeTemplate')
-					.value;
-				var templateDescription = document.getElementById(
-					'descricaoTemplate'
-				).value;
-
-				if (templateName == '' || templateDescription == '') {
-					alert('Os campos precisam ser preenchidos.');
-					return false;
-				} else {
-					var data = {
-						action: 'hgodbee_save_template',
-						name: templateName,
-						dsc: templateDescription,
-						json: jsonFile,
-						nonce: hgodbee_object.nonce_save_as_template,
-					};
-					jQuery
-						.post(ajaxURL, data, function (response) {
-							//alert(response);
-							var notificationArea = document.getElementById(
-								'notification-area'
-							);
-							notificationArea.innerHTML = response;
-						})
-						.done(jQuery('#templateSave').modal('hide'));
-				}
-			});
-		}),
-
-		(bee_config.onSend = function (htmlFile) {
-			jQuery('#enviaTeste').modal('show');
-			jQuery('#enviaTesteBTN').click(function () {
-				var contatos = document.getElementById('enderecoEnvio')
-					.value;
-				var assunto = document.getElementById('assuntoEnvio').value;
-				//var html = JSON.stringify("{'num':" + htmlFile + "}");
-
-				if (contatos == '' || assunto == '') {
-					alert('Os campos precisam ser preenchidos.');
-					return false;
-				} else {
-					var data = {
-						action: 'emakbee_envia_teste',
-						contatos: contatos,
-						assunto: assunto,
-						html: htmlFile,
-						nonce: emakbee_infos.nonce_enviateste,
-					};
-					jQuery
-						.post(ajaxURL, data, function (response) {
-							//alert(response);
-							var notificationArea = document.getElementById(
-								'notificationArea'
-							);
-							notificationArea.innerHTML = response;
-						})
-						.done(jQuery('#enviaTeste').modal('hide'));
-				}
-			});
-		}),
-
-		(bee_config.onError = function (errorMessage) {
-			app.onError(errorMessage);
-		});
-
 	}
 
 	/**************************************************************************
@@ -316,10 +320,10 @@ function BeeApp(token, bee_config, beetemplates) {
 				var method = buttons[i][1];
 				result = result.concat([
 					"<a class='nav-link' role='button' href='javascript:void(0)' onclick='BeeApp.singleton.editor.plugin." +
-					method +
-					"()'>" +
-					label +
-					'</a>',
+						method +
+						"()'>" +
+						label +
+						'</a>',
 				]);
 			}
 			result.push('</div></div>');
@@ -337,7 +341,6 @@ function BeeApp(token, bee_config, beetemplates) {
 			this.container.style.display = 'none';
 		};
 	}
-
 
 	function BeeEditor() {
 		var that = this;
@@ -371,7 +374,6 @@ function BeeApp(token, bee_config, beetemplates) {
 			}
 
 			this.plugin.start(this.template);
-			console.log(this.template);
 
 			onscreenElement(that.container);
 		};
@@ -381,7 +383,6 @@ function BeeApp(token, bee_config, beetemplates) {
 		};
 		return this;
 	}
-
 
 	function BeeSender() {
 		this.thumbnail = undefined;
@@ -411,7 +412,6 @@ function BeeApp(token, bee_config, beetemplates) {
 		};
 	}
 
-
 	//this.html_processor = new HTMLProcessor();
 	this.callbacks = new BeeCallbacks(this, bee_config);
 	this.spinner = new Spinner();
@@ -431,7 +431,6 @@ function BeeApp(token, bee_config, beetemplates) {
 		this.sender.start(); // @@god comentado por teste
 		this.editor.show(); // @god atenção aqui
 	};
-
 
 	// Smoothly display the editor.
 	//

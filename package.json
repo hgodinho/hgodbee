@@ -1,7 +1,6 @@
 {
   "name": "hgodbee",
-  "version": "0.2.0",
-  "description": "",
+  "version": "0.3.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,6 +16,8 @@
   },
   "homepage": "https://github.com/hgodinho/hgodbee#readme",
   "dependencies": {
-    "feather-icons": "^4.28.0"
-  }
+    "@yaireo/tagify": "^3.16.2"
+  },
+  "devDependencies": {},
+  "description": ""
 }

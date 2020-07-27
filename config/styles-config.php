@@ -23,8 +23,16 @@ $styles = array(
     ),
     'hgodbee'       => array(
         'hook'      => 'wp_enqueue_scripts',
-        'handle'    => $config['prefix'] . 'hgdobee_css',
+        'handle'    => $config['prefix'] . 'hgodbee_css',
         'src'       => dirname(plugin_dir_url(__FILE__)) . '/css/hgodbee-styles.css',
+        'deps'      => array(),
+        'ver'       => HB_VERSION,
+        'in_footer' => false,
+    ),
+    'tagify'       => array(
+        'hook'      => 'wp_enqueue_scripts',
+        'handle'    => $config['prefix'] . 'tagify_css',
+        'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/@yaireo/tagify/dist/tagify.css',
         'deps'      => array(),
         'ver'       => HB_VERSION,
         'in_footer' => false,

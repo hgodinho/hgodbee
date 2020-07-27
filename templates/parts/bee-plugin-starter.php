@@ -11,11 +11,8 @@
                 //var autosavejson = '<?php //echo $autosavejson; ?>';
 
                 var template = <?php echo $template; ?> ;
-                console.log(template);
                 var token = <?php echo $token; ?> ;
-                console.log(token);
                 var pluginUID = '<?php echo $uid; ?>';
-                console.log(pluginUID);
                 /*
                 if (autosavejson != 0) {
                     templates.unshift({
@@ -25,7 +22,7 @@
                     })
                 } */
 
-                var app = new BeeApp(
+                var app = new window.BeeApp(
                     token,
                     getBeeConfig(
                         pluginUID, // user_id
