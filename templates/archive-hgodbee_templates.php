@@ -24,12 +24,17 @@ if (is_user_logged_in()) {
         <?php
 while ($templates->have_posts()) {
             $templates->the_post();
-            $terms = get_the_terms(get_the_ID(), $config['prefix'] . 'tax');
+            $terms        = get_the_terms(get_the_ID(), $config['prefix'] . 'tax');
             $terms_in_use = array();
-            foreach ( $terms as $term ){
-                array_push($terms_in_use, $term->name);
+            //HGodBee::hb_var_dump($terms, __CLASS__, __METHOD__, __LINE__, false);
+            if (has_term('', $config['prefix'] . 'tax')) {
+                foreach ($terms as $term) {
+                    array_push($terms_in_use, $term->name);
+                }
+                hgodbee_plugin_card($terms_in_use);
+            } else {
+                hgodbee_plugin_card('');
             }
-            hgodbee_plugin_card($terms_in_use);
         }
         ?>
     </div>

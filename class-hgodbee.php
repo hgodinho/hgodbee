@@ -3,7 +3,7 @@
  * @wordpress-plugin
  * Plugin Name: HGodBee
  * Description: Integração do beeplugin com o wordpress.org
- * Version: 0.3.0
+ * Version: 0.4.0
  * Author: hgodinho
  * Author URI: hgodinho.com
  * Text Domain: hgodbee
@@ -17,6 +17,7 @@
  * - transformar as funções var_dump e file_data em uma classe especifica de debug,
  *  incluir outros métodos úteis
  * - criar função de criar template vazio no início do plugin.
+ * - merge a class-hgod-admin.php com o github principal
  */
 
 /**
@@ -25,9 +26,14 @@
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-loads.php';
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-cpt.php';
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-tax.php';
-require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-admin.php';
+
 require dirname(__FILE__) . '/inc/beefree/BeeFree.php';
 require_once dirname(__FILE__) . '/templates/parts/bee-plugin-notification.php';
+include_once dirname(__FILE__ ) . '/functions/hgodbee-ajax.php';
+
+//require_once dirname(__FILE__) . '/config/class-hb-config.php';
+require_once dirname(__FILE__) . '/admin/class-hb-admin.php';
+
 
 //$ajax_functions = include 'functions/hgodbee-ajax.php';
 
@@ -99,13 +105,6 @@ class HGodBee {
     protected $tag;
 
     /**
-     * Admin config array
-     *
-     * @var array
-     */
-    protected $admin;
-
-    /**
      * Scripts config array
      *
      * @var array
@@ -149,6 +148,7 @@ class HGodBee {
      * Construtor
      */
     private function __construct() {
+
         $this->config();
 
         if (class_exists('HGod_tax')) {
@@ -165,8 +165,10 @@ class HGodBee {
             }
         }
 
-        if (class_exists('HGod_admin')) {
-            $this->set_admin();
+        if ( class_exists('HB_Admin')) {
+            $admin = new HB_Admin($this->prefix);
+            $admin->set_admin();
+            $admin->init();
         }
 
         if (class_exists('HGod_loads')) {
@@ -178,9 +180,9 @@ class HGodBee {
             $this->on_activation();
         }
 
-        add_action('wp_ajax_hgodbee_save_template', array($this, 'hgodbee_save_template'));
-        add_action('wp_ajax_hgodbee_save', array($this, 'hgodbee_save'));
-        add_action('wp_ajax_hgodbee_token', array($this, 'hgodbee_token'));
+        add_action('wp_ajax_hgodbee_save_template', 'hgodbee_save_template');
+        add_action('wp_ajax_hgodbee_save', 'hgodbee_save');
+        add_action('wp_ajax_hgodbee_token', 'hgodbee_token');
 
         add_filter('query_vars', array($this, 'custom_query_vars'));
 
@@ -222,11 +224,6 @@ class HGodBee {
         $this->tag = include 'config/tag-config.php';
 
         /**
-         * Configura Admin
-         */
-        $this->admin = include 'config/admin-config.php';
-
-        /**
          * Configura scripts
          */
         /**
@@ -264,243 +261,6 @@ class HGodBee {
     public function custom_query_vars($qvars) {
         $qvars[] = 'action';
         return $qvars;
-    }
-
-    /**
-     * AJAX FUNTIONS!
-     */
-    /**
-     * Retrieves the Bee Token
-     *
-     * You must have a developer account at https://developers.beefree.io/
-     *
-     * @return void
-     */
-    public function hgodbee_token() {
-        $nonce = check_ajax_referer($this->config['prefix'] . 'admin', 'nonce');
-        global $wpdb;
-        $options       = get_option($this->admin['settings']['option_name']);
-        $client_id     = $options[$this->admin['fields']['id']['id']];
-        $client_secret = $options[$this->admin['fields']['secret']['id']];
-        $beeplugin     = new BeeFree($client_id, $client_secret);
-        $token         = $beeplugin->getCredentials();
-
-        if (isset($token->access_token)) {
-            $token_saved = update_option($this->config['prefix'] . 'token', $token);
-
-            if (true === $token_saved) {
-                echo '<div class="alert alert-success alert-dismissible fade show" role="alert"><strong>';
-                echo 'Token gerado e salvo com sucesso.';
-                echo '</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
-            } else {
-                echo '<div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>';
-                echo 'Token NÃO salvo.';
-                echo '</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
-            }
-        }
-        wp_die();
-    }
-
-    /**
-     * Salva template
-     */
-    public function hgodbee_save_template() {
-        $nonce = check_ajax_referer($this->config['prefix'] . 'save_as_template', 'nonce');
-        global $wpdb;
-        $json_template        = $_POST['json'];
-        $template_name        = $_POST['name'];
-        $template_description = $_POST['dsc'];
-        $cpt                  = $this->cpt['name'];
-        if (post_exists($template_name)) {
-            $page_id         = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_title = '" . $template_name . "' AND post_type = '" . $cpt . "'");
-            $template_update = array(
-                'ID'           => $page_id,
-                'post_content' => $json_template,
-                'post_excerpt' => $template_description,
-            );
-            wp_update_post($template_update);
-            hgodbee_beeplugin_notification('Template atulizado com sucesso', $template_name, 'teal');
-        } else {
-            if (current_user_can('edit_posts')) {
-                $saved = wp_insert_post(array(
-                    'post_content' => $json_template,
-                    'post_title'   => $template_name,
-                    'post_excerpt' => $template_description,
-                    'post_status'  => 'publish',
-                    'post_type'    => $cpt,
-                )
-                );
-                hgodbee_beeplugin_notification('Template criado com sucesso', $template_name, 'green');
-            } else {
-                hgodbee_beeplugin_notification('Você não tem permissão para fazer isso.', $template_name, 'orange');
-            }
-        }
-        delete_transient('emakbee_autosave');
-        delete_transient('emakbee_user');
-        wp_die();
-    }
-
-    public function hgodbee_save() {
-        $nonce = check_ajax_referer($this->config['prefix'] . 'save', 'nonce');
-        global $wpdb;
-        $json_template = $_POST['json'];
-        $html_file     = $_POST['html'];
-        $template_name = $_POST['name'];
-        //$template_description = $_POST['dsc'];
-        $categories = $_POST['categories'];
-        $tags       = $_POST['tags'];
-        $cpt        = $this->cpt['name'];
-
-        if (current_user_can('edit_posts')) {
-            if (post_exists($template_name)) {
-                /**
-                 * ATUALIZA O TEMPLATE
-                 */
-                $page_id         = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_title = '" . $template_name . "' AND post_type = '" . $cpt . "'");
-                $template_update = array(
-                    'ID'           => $page_id,
-                    'post_content' => $json_template,
-                    //'post_excerpt' => $template_description,
-                );
-                $saved = wp_update_post($template_update); // return (int|WP_Error) The post ID on success. The value 0 or WP_Error on failure.
-
-                /**
-                 * Salva o HTML no meta field
-                 */
-                $saved_html = update_post_meta($saved, $this->config['prefix'] . 'saved_html', $html_file); //return(int|bool) The new meta field ID if a field with the given key didn't exist and was therefore added, true on successful update, false on failure.
-
-                /**
-                 * Adiciona e relaciona as categorias ao post que acabamos de adicionar
-                 *
-                 * Aqui primeiro criamos um array para armazernar as ids dos termos
-                 * depois interagimos no loop verificando se elas já existem no banco
-                 * de dados, se não existirem, adicionamos e colocamos a ID dos termos
-                 * no array criado anteriormente. Se o termo já existe, somente iserimos
-                 * a ID do termo no array $terms_id. Por fim relacionamos o o array com
-                 * o template criado anteriormente.
-                 */
-                $terms_id = array();
-                foreach ($categories as $category) {
-                    if (!term_exists($category, $this->config['prefix'] . 'tax')) {
-                        $term_added = wp_insert_term($category, $this->config['prefix'] . 'tax'); // return (array|WP_Error) An array containing the term_id and term_taxonomy_id, WP_Error otherwise.
-                        array_push($terms_id, $term_added['term_id']);
-                    } else {
-                        $term = get_term_by('name', $category, $this->config['prefix'] . 'tax');
-                        array_push($terms_id, $term->term_id);
-                    }
-                }
-                $term_related = wp_set_object_terms($saved, $terms_id, $this->config['prefix'] . 'tax', false); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
-
-                /**
-                 * Adiciona e relaciona as tags ao post que acabamos de adicionar
-                 *
-                 * Aqui primeiro criamos um array para armazernar as ids dos termos
-                 * depois interagimos no loop verificando se elas já existem no banco
-                 * de dados, se não existirem, adicionamos e colocamos a ID dos termos
-                 * no array criado anteriormente. Se o termo já existe, somente iserimos
-                 * a ID do termo no array $tags_id. Por fim relacionamos o o array com
-                 * o template criado anteriormente.
-                 */
-                $tags_id = array();
-                foreach ($tags as $tag) {
-                    if (!term_exists($tag['value'], $this->config['prefix'] . 'tag')) {
-                        $tag_added = wp_insert_term($tag['value'], $this->config['prefix'] . 'tag'); // return (array|WP_Error) An array containing the term_id and term_taxonomy_id, WP_Error otherwise.
-                        array_push($tags_id, $tag_added['term_id']);
-                    } else {
-                        $tag = get_term_by('name', $tag['value'], $this->config['prefix'] . 'tag');
-                        array_push($tags_id, $tag->term_id);
-                    }
-                }
-                $tag_related = wp_set_object_terms($saved, $tags_id, $this->config['prefix'] . 'tag', false); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
-
-                /**
-                 * Resposta Ajax
-                 *
-                 * @see templates/parts/bee-plugin-notification.php
-                 */
-                hgodbee_beeplugin_notification('Template atulizado com sucesso', $template_name, 'teal');
-
-            } else {
-                /**
-                 * INSERE O TEMPLATE
-                 */
-                $saved = wp_insert_post(
-                    array(
-                        'post_content' => $json_template,
-                        'post_title'   => $template_name,
-                        //'post_excerpt' => $template_description,
-                        'post_status'  => 'publish',
-                        'post_type'    => $cpt,
-                    )
-                );
-
-                /**
-                 * Salva o HTML no metafield
-                 */
-                $saved_html = update_post_meta($saved, $this->config['prefix'] . 'saved_html', $html_file);
-
-                /**
-                 * Adiciona e relaciona as categorias ao post que acabamos de adicionar
-                 *
-                 * Aqui primeiro criamos um array para armazernar as ids dos termos
-                 * depois interagimos no loop verificando se elas já existem no banco
-                 * de dados, se não existirem, adicionamos e colocamos a ID dos termos
-                 * no array criado anteriormente. Se o termo já existe, somente iserimos
-                 * a ID do termo no array $terms_id. Por fim relacionamos o o array com
-                 * o template criado anteriormente.
-                 */
-                $terms_id = array();
-                foreach ($categories as $category) {
-                    if (!term_exists($category, $this->config['prefix'] . 'tax')) {
-                        $term_added = wp_insert_term($category, $this->config['prefix'] . 'tax'); // return (array|WP_Error) An array containing the term_id and term_taxonomy_id, WP_Error otherwise.
-                        array_push($terms_id, $term_added['term_id']);
-                    } else {
-                        $term = get_term_by('name', $category, $this->config['prefix'] . 'tax');
-                        array_push($terms_id, $term->term_id);
-                    }
-                }
-                $term_related = wp_set_object_terms($saved, $terms_id, $this->config['prefix'] . 'tax', false); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
-
-                /**
-                 * Adiciona e relaciona as tags ao post que acabamos de adicionar
-                 *
-                 * Aqui primeiro criamos um array para armazernar as ids dos termos
-                 * depois interagimos no loop verificando se elas já existem no banco
-                 * de dados, se não existirem, adicionamos e colocamos a ID dos termos
-                 * no array criado anteriormente. Se o termo já existe, somente iserimos
-                 * a ID do termo no array $tags_id. Por fim relacionamos o o array com
-                 * o template criado anteriormente.
-                 */
-                $tags_id = array();
-                foreach ($tags as $tag) {
-                    if (!term_exists($tag['value'], $this->config['prefix'] . 'tag')) {
-                        $tag_added = wp_insert_term($tag['value'], $this->config['prefix'] . 'tag'); // return (array|WP_Error) An array containing the term_id and term_taxonomy_id, WP_Error otherwise.
-                        array_push($tags_id, $tag_added['term_id']);
-                    } else {
-                        $tag = get_term_by('name', $tag['value'], $this->config['prefix'] . 'tag');
-                        array_push($tags_id, $tag->term_id);
-                    }
-                }
-                $tag_related = wp_set_object_terms($saved, $tags_id, $this->config['prefix'] . 'tag', false); // return (array|WP_Error) Term taxonomy IDs of the affected terms or WP_Error on failure.
-
-                /**
-                 * Resposta Ajax
-                 *
-                 * @see templates/parts/bee-plugin-notification.php
-                 */
-                hgodbee_beeplugin_notification('Template criado com sucesso', $template_name, 'green');
-            }
-        } else {
-            /**
-             * Resposta Ajax
-             *
-             * @see templates/parts/bee-plugin-notification.php
-             */
-            hgodbee_beeplugin_notification('Você não tem permissão para fazer isso.', $template_name, 'orange');
-        }
-        delete_transient('emakbee_autosave');
-        delete_transient('emakbee_user');
-        wp_die();
     }
 
     /**
@@ -564,66 +324,6 @@ class HGodBee {
     }
 
     /**
-     * Set Admin
-     *
-     * Configura as opções do menu e settings no admin e
-     * cria uma nova instância da classe HGod_Admin
-     *
-     * @return void
-     */
-    public function set_admin() {
-        $args = array(
-            array(
-                'admin_menu'    => array(
-                    'title'      => $this->admin['admin_menu']['title'], // Page Title.
-                    'menu_title' => $this->admin['admin_menu']['menu_title'], // Menu Title.
-                    'capability' => 'edit_posts', // Capabilities.
-                    'menu_slug'  => $this->admin['admin_menu']['menu_slug'], // Menu Slug.
-                    'callback'   => array($this, 'options_page'), // Callback.
-                    'position'   => 3, // Position on Menu.
-                ),
-                'admin_submenu' => array(
-                    array(
-                        'parent_slug' => $this->admin['admin_menu']['menu_slug'],
-                        'page_title'  => $this->cpt['label'],
-                        'menu_title'  => $this->cpt['label'],
-                        'menu_slug'   => 'edit.php?post_type=' . $this->cpt['name'],
-                    ),
-                    array(
-                        'parent_slug' => $this->admin['admin_menu']['menu_slug'],
-                        'page_title'  => $this->tax['label'],
-                        'menu_title'  => $this->tax['label'],
-                        'menu_slug'   => 'edit-tags.php?taxonomy=' . $this->tax['name'] . '&post_type=' . $this->cpt['name'],
-                    ),
-                    array(
-                        'parent_slug' => $this->admin['admin_menu']['menu_slug'],
-                        'page_title'  => $this->tag['label'],
-                        'menu_title'  => $this->tag['label'],
-                        'menu_slug'   => 'edit-tags.php?taxonomy=' . $this->tag['name'] . '&post_type=' . $this->cpt['name'],
-                    ),
-                ),
-                'settings'      => array(
-                    array(
-                        'option_group' => $this->admin['settings']['option_group'],
-                        'option_name'  => $this->admin['settings']['option_name'],
-                        'sections'     => array(
-                            array(
-                                'id'       => $this->admin['sections']['config_bee']['id'],
-                                'title'    => $this->admin['sections']['config_bee']['title'],
-                                'callback' => array($this, 'settings_section_callback'),
-                                'page'     => $this->admin['settings']['option_group'],
-                                'fields'   => $this->admin['fields'],
-                            ),
-                        ),
-                    ),
-                ),
-                'txt_domain'    => HB_TXTDOMAIN,
-            ),
-        );
-        $admin = new HGod_Admin($args);
-    }
-
-    /**
      * Define a taxonomia e tag do template e cria
      * uma nova instância da classe HGod_Tax
      *
@@ -684,7 +384,6 @@ class HGodBee {
             ),
         );
         $cpt = new HGod_Cpt($args);
-
     }
 
     /**
@@ -708,99 +407,6 @@ class HGodBee {
         }
         return $single_template;
     }
-
-    /**
-     * Settings Section Callback
-     *
-     * @return void
-     */
-    public function settings_section_callback() {
-        esc_html_e('Insira o client id, secret e uid nos campos abaixo', 'hgodbee');
-    }
-
-    /**
-     * Client ID
-     *
-     * @return void
-     */
-    public function client_id() {
-        $option  = $this->admin['settings']['option_name'];
-        $id      = $this->admin['fields']['id']['id'];
-        $name    = $option . '[' . $id . ']';
-        $options = get_option($option);
-        $this->render_input($id, $name, $options[$id]);
-    }
-
-    /**
-     * Client Secret
-     */
-    public function client_secret() {
-        $option  = $this->admin['settings']['option_name'];
-        $id      = $this->admin['fields']['secret']['id'];
-        $name    = $option . '[' . $id . ']';
-        $options = get_option($option);
-        $this->render_input($id, $name, $options[$id]);
-    }
-
-    /**
-     * Client UID
-     */
-    public function client_uid() {
-        $option  = $this->admin['settings']['option_name'];
-        $id      = $this->admin['fields']['uid']['id'];
-        $name    = $option . '[' . $id . ']';
-        $options = get_option($option);
-        $this->render_input($id, $name, $options[$id]);
-    }
-
-    /**
-     * Render Input
-     *
-     * @param string $id | Id.
-     * @param string $name | Name.
-     * @param string $value | Value.
-     * @return void
-     */
-    public function render_input($id, $name, $value) {
-        ?>
-<input type="text" id="<?php echo esc_attr($id); ?>" name="<?php echo esc_attr($name); ?>"
-    value="<?php echo esc_attr($value); ?>">
-<?php
-}
-
-    /**
-     * Options Page
-     *
-     * @return void
-     */
-    public function options_page() {
-        //$url = get_site_url(null, '/bee-email');
-        $url = get_post_type_archive_link($this->cpt['name']);
-        ?>
-        <div class="wrap">
-            <div id="notification-area">
-            </div>
-            <h1><?php echo esc_html(get_admin_page_title()); ?></h1><small><?php echo esc_html(HB_VERSION); ?></small>
-
-            <br>
-            <a href="<?php echo esc_url($url); ?>">Ir para o editor</a>
-            <form action='options.php' method='post'>
-                <?php
-if (!current_user_can('manage_options')) {
-            echo '<fieldset disabled>';
-        } else {
-            echo '<fieldset>';
-        }
-        settings_fields($this->admin['settings']['option_group']);
-        do_settings_sections($this->admin['settings']['option_group']);
-        ?>
-                <input type="submit" id="submit" class="btn btn-primary" value="Salvar alterações" />
-                <input type="button" id="get_token" class="btn btn-secondary" name="get_token" value="Gerar token" />
-                </fieldset>
-            </form>
-        </div>
-    <?php
-}
 
     /**
      * Cria nova página com os parâmetros passados
