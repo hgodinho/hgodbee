@@ -10,12 +10,17 @@
 
 ## Changelog
 
+`0.5.2`
+
+- removed includes from admin/class-hb-admin.php
+
+***
+
 `0.5.1`
 
 - Removed config/cpt-config and minor changes in admin/class-hb-admin.php
 - minor changes in class-hgodbee.php
 
-***
 
 `0.5.0`
 

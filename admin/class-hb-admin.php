@@ -46,12 +46,6 @@ class HB_Admin {
         $prefix = $this->prefix;
 
         /**
-         * Includes
-         */
-        $tax       = include dirname(plugin_dir_path(__FILE__)) . '/config/tax-config.php';
-        $tag       = include dirname(plugin_dir_path(__FILE__)) . '/config/tag-config.php';
-
-        /**
          * Admin Menu
          */
         $admin_menu = array(
