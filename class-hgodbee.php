@@ -3,7 +3,7 @@
  * @wordpress-plugin
  * Plugin Name: HGodBee
  * Description: Integração do beeplugin com o wordpress.org
- * Version: 0.5.0
+ * Version: 0.5.1
  * Author: hgodinho
  * Author URI: hgodinho.com
  * Text Domain: hgodbee
@@ -12,7 +12,6 @@
  * @author Hgodinho
  * @copyright 2020 Henrique Godinho
  * @link https://docs.beeplugin.io/initializing-bee-plugin/
- *
  */
 
 /**
@@ -23,14 +22,10 @@ require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-tax.php';
 
 require dirname(__FILE__) . '/inc/beefree/BeeFree.php';
 require_once dirname(__FILE__) . '/templates/parts/bee-plugin-notification.php';
-include_once dirname(__FILE__ ) . '/functions/hgodbee-ajax.php';
+include_once dirname(__FILE__) . '/functions/hgodbee-ajax.php';
 
-//require_once dirname(__FILE__) . '/config/class-hb-config.php';
 require_once dirname(__FILE__) . '/admin/class-hb-admin.php';
 require_once dirname(__FILE__) . '/class/class-hb-cpt.php';
-
-
-//$ajax_functions = include 'functions/hgodbee-ajax.php';
 
 /**
  * Classe principal
@@ -143,27 +138,17 @@ class HGodBee {
      * Construtor
      */
     private function __construct() {
-
+        define('HB_PREFIX', $this->prefix);
         $this->config();
 
         if (class_exists('HGod_tax')) {
             $this->set_tax();
         }
 
-        if (class_exists('HB_Cpt')) {
-            
+        if (class_exists('HB_Cpt')) {   
             $cpt = new HB_Cpt($this->prefix);
             $cpt->set_cpt();
             $cpt->init();
-            /*
-            $this->set_cpt();
-            if (isset($this->cpt['archive_template'])) {
-                add_filter('archive_template', array($this, 'set_custom_archive_template'));
-            }
-            if (isset($this->cpt['single_template'])) {
-                add_filter('single_template', array($this, 'set_custom_single_template'));
-            }
-            */
         }
 
         if ( class_exists('HB_Admin')) {

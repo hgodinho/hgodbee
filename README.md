@@ -7,9 +7,15 @@
 1. transformar as funções var_dump e file_data em uma classe especifica de debug e incluir outros métodos úteis,
 2. criar função de criar template vazio no início do plugin,
 3. MUITO IMPORTANTE merge a vendor/hgod/classes/class-hgod-admin.php com o github principal. MUITO IMPORTANTE
-4. remover config/config-cpt.php para isso tem que alterar a admin/class-hb-admin.php
 
 ## Changelog
+
+`0.5.1`
+
+- Removed config/cpt-config and minor changes in admin/class-hb-admin.php
+- minor changes in class-hgodbee.php
+
+***
 
 `0.5.0`
 
@@ -18,7 +24,6 @@
 - removed config/cpt-config.php
 - irrelevant changes in admin/class-hb-admin.php
 
-***
 `0.4.0`
 
 - removed ajax functions from core class and passed to a exclusive file,

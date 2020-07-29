@@ -6,11 +6,10 @@ wp_head();
 
 if (is_user_logged_in()) {
     $config = include dirname(plugin_dir_path(__FILE__)) . '/config/config.php';
-    $cpt    = include dirname(plugin_dir_path(__FILE__)) . '/config/cpt-config.php';
     $card   = include plugin_dir_path(__FILE__) . 'parts/bee-plugin-card.php';
     $args   = array(
         //'post_type'      => 'template_bee',
-        'post_type'      => $cpt['name'],
+        'post_type'      => HB_PREFIX . 'templates',
         'posts_per_page' => '10',
         'order'          => 'ASC',
         'order_by'       => 'date',
@@ -24,10 +23,10 @@ if (is_user_logged_in()) {
         <?php
 while ($templates->have_posts()) {
             $templates->the_post();
-            $terms        = get_the_terms(get_the_ID(), $config['prefix'] . 'tax');
+            $terms        = get_the_terms(get_the_ID(), HB_PREFIX . 'tax');
             $terms_in_use = array();
             //HGodBee::hb_var_dump($terms, __CLASS__, __METHOD__, __LINE__, false);
-            if (has_term('', $config['prefix'] . 'tax')) {
+            if (has_term('', HB_PREFIX . 'tax')) {
                 foreach ($terms as $term) {
                     array_push($terms_in_use, $term->name);
                 }

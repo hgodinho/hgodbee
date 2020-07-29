@@ -14,8 +14,6 @@ class HB_Admin {
 
     public $fields;
 
-    protected $cpt;
-
     /**
      * Construtor
      */
@@ -50,8 +48,6 @@ class HB_Admin {
         /**
          * Includes
          */
-        $cpt       = include dirname(plugin_dir_path(__FILE__)) . '/config/cpt-config.php';
-        $this->cpt = $cpt;
         $tax       = include dirname(plugin_dir_path(__FILE__)) . '/config/tax-config.php';
         $tag       = include dirname(plugin_dir_path(__FILE__)) . '/config/tag-config.php';
 
@@ -74,21 +70,21 @@ class HB_Admin {
         $admin_submenu = array( // resolver includes do cpt e da tax
             'templates' => array(
                 'parent_slug' => $admin_menu['menu_slug'],
-                'page_title'  => $cpt['label'],
-                'menu_title'  => $cpt['label'],
-                'menu_slug'   => 'edit.php?post_type=' . $cpt['name'],
+                'page_title'  => 'Templates',
+                'menu_title'  => 'Templates',
+                'menu_slug'   => 'edit.php?post_type=' . $prefix . 'templates',
             ),
             'categoria' => array(
                 'parent_slug' => $admin_menu['menu_slug'],
-                'page_title'  => $tax['label'],
-                'menu_title'  => $tax['label'],
-                'menu_slug'   => 'edit-tags.php?taxonomy=' . $tax['name'] . '&post_type=' . $cpt['name'],
+                'page_title'  => 'Categorias',
+                'menu_title'  => 'Categorias',
+                'menu_slug'   => 'edit-tags.php?taxonomy=' . $prefix . 'tax' . '&post_type=' . $prefix . 'templates',
             ),
             'tags'      => array(
                 'parent_slug' => $admin_menu['menu_slug'],
-                'page_title'  => $tag['label'],
-                'menu_title'  => $tag['label'],
-                'menu_slug'   => 'edit-tags.php?taxonomy=' . $tag['name'] . '&post_type=' . $cpt['name'],
+                'page_title'  => 'Tags',
+                'menu_title'  => 'Tags',
+                'menu_slug'   => 'edit-tags.php?taxonomy=' . $prefix . 'tag' . '&post_type=' . $prefix . 'templates',
             ),
         );
         $this->admin_submenu = $admin_submenu;
@@ -218,7 +214,7 @@ class HB_Admin {
      */
     public function options_page() {
         //$url = get_site_url(null, '/bee-email');
-        $url = get_post_type_archive_link($this->cpt['name']);
+        $url = get_post_type_archive_link($this->prefix . 'templates');
         ?>
         <div class="wrap">
             <div id="notification-area">
