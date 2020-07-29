@@ -3,7 +3,7 @@
  * @wordpress-plugin
  * Plugin Name: HGodBee
  * Description: Integração do beeplugin com o wordpress.org
- * Version: 0.4.0
+ * Version: 0.5.0
  * Author: hgodinho
  * Author URI: hgodinho.com
  * Text Domain: hgodbee
@@ -13,18 +13,12 @@
  * @copyright 2020 Henrique Godinho
  * @link https://docs.beeplugin.io/initializing-bee-plugin/
  *
- * @todo
- * - transformar as funções var_dump e file_data em uma classe especifica de debug,
- *  incluir outros métodos úteis
- * - criar função de criar template vazio no início do plugin.
- * - merge a class-hgod-admin.php com o github principal
  */
 
 /**
  * Requires
  */
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-loads.php';
-require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-cpt.php';
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-tax.php';
 
 require dirname(__FILE__) . '/inc/beefree/BeeFree.php';
@@ -33,6 +27,7 @@ include_once dirname(__FILE__ ) . '/functions/hgodbee-ajax.php';
 
 //require_once dirname(__FILE__) . '/config/class-hb-config.php';
 require_once dirname(__FILE__) . '/admin/class-hb-admin.php';
+require_once dirname(__FILE__) . '/class/class-hb-cpt.php';
 
 
 //$ajax_functions = include 'functions/hgodbee-ajax.php';
@@ -155,7 +150,12 @@ class HGodBee {
             $this->set_tax();
         }
 
-        if (class_exists('HGod_cpt')) {
+        if (class_exists('HB_Cpt')) {
+            
+            $cpt = new HB_Cpt($this->prefix);
+            $cpt->set_cpt();
+            $cpt->init();
+            /*
             $this->set_cpt();
             if (isset($this->cpt['archive_template'])) {
                 add_filter('archive_template', array($this, 'set_custom_archive_template'));
@@ -163,6 +163,7 @@ class HGodBee {
             if (isset($this->cpt['single_template'])) {
                 add_filter('single_template', array($this, 'set_custom_single_template'));
             }
+            */
         }
 
         if ( class_exists('HB_Admin')) {
@@ -211,7 +212,7 @@ class HGodBee {
         /**
          * Configura CPT.
          */
-        $this->cpt = include 'config/cpt-config.php';
+        //$this->cpt = include 'config/cpt-config.php';
 
         /**
          * Configura Taxonomias.
@@ -364,8 +365,10 @@ class HGodBee {
      * uma noa instância da classe HGod_Cpt
      *
      * @return void
+     * @deprecated 0.5.0
      */
     public function set_cpt() {
+        /*
         $args = array(
             array(
                 'name' => $this->cpt['name'],
@@ -379,33 +382,46 @@ class HGodBee {
                     'taxonomies'   => array($this->tax['name'], $this->tag['name']),
                     'public'       => false,
                     'show_in_menu' => false,
-
                 ),
             ),
         );
         $cpt = new HGod_Cpt($args);
+        */
+        _deprecated_function( __FUNCTION__, '0.5.0', 'nothing' );
+        HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
     /**
      * Define o template para ser usado no arquivo de $cpt['name']
+     * @deprecated 0.5.0
      */
     public function set_custom_archive_template($archive_template) {
+        /*
         global $post;
         if (is_post_type_archive($this->cpt['name'])) {
             $archive_template = $this->cpt['archive_template'];
         }
         return $archive_template;
+        */
+        _deprecated_function( __FUNCTION__, '0.5.0', 'nothing' );
+        HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
     /**
      * Define o template para ser usado no single de $cpt['name']
+     * @deprecated 0.5.0
      */
     public function set_custom_single_template($single_template) {
+        /*
         global $post;
         if (is_singular($this->cpt['name'])) {
             $single_template = $this->cpt['single_template'];
         }
         return $single_template;
+        */
+        _deprecated_function( __FUNCTION__, '0.5.0', 'nothing' );
+        HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
+
     }
 
     /**

@@ -2,11 +2,6 @@
 include dirname(plugin_dir_path(__FILE__)) . '/vendor/hgod/classes/class-hgod-admin.php';
 
 class HB_Admin {
-    /**
-     * Instância
-     *
-     * @var object
-     */
     protected $prefix;
 
     public $admin_menu;
@@ -149,9 +144,6 @@ class HB_Admin {
         $this->sections        = $sections;
         $settings['sections']  = $sections;
         $this->settings        = $settings;
-
-        // $txt_domain @NECESSARIO???
-        $txt_domain = HB_TXTDOMAIN;
     }
 
     /**
@@ -237,7 +229,7 @@ class HB_Admin {
             <a href="<?php echo esc_url($url); ?>">Ir para o editor</a>
             <form action='options.php' method='post'>
                 <?php
-if (!current_user_can('manage_options')) {
+        if (!current_user_can('manage_options')) {
             echo '<fieldset disabled>';
         } else {
             echo '<fieldset>';
@@ -251,10 +243,6 @@ if (!current_user_can('manage_options')) {
             </form>
         </div>
         <?php
-}
-}
+    }
 
-/**
- * Inicia o Admin.
- */
-//HB_Admin::get_instance();
+}
