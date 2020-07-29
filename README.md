@@ -10,11 +10,16 @@
 
 ## Changelog
 
+`0.6.0`
+
+- removed config/tax-config.php config/tag-config.php
+- add class-hb-tax.php
+- doc add in class/class-hb-cpt
+- minor changes in class-hgobee
+
 `0.5.2`
 
 - removed includes from admin/class-hb-admin.php
-
-***
 
 `0.5.1`
 

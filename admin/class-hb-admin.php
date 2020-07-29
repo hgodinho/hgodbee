@@ -1,33 +1,64 @@
 <?php
-include dirname(plugin_dir_path(__FILE__)) . '/vendor/hgod/classes/class-hgod-admin.php';
+/**
+ * Admin configurations
+ * @since 0.4.0
+ */
+/**
+ * Require vendor/hgod/classes/class-hgod-tax.php
+ */
+require_once dirname(__FILE__, 2) . '/vendor/hgod/classes/class-hgod-admin.php';
 
+/**
+ * HB_Admin
+ */
 class HB_Admin {
+    /**
+     * Prefix
+     *
+     * @var string
+     */
     protected $prefix;
 
+    /**
+     * Admin Menu 
+     *
+     * @var array
+     */
     public $admin_menu;
 
+    /**
+     * Admin Submenu
+     *
+     * @var array
+     */
     public $admin_submenu;
 
+    /**
+     * Settings
+     *
+     * @var array
+     */
     public $settings;
 
+    /**
+     * Sections
+     *
+     * @var array
+     */
     public $sections;
 
+    /**
+     * Fields
+     *
+     * @var array
+     */
     public $fields;
 
     /**
-     * Construtor
+     * Constructor
      */
     public function __construct($prefix) {
         $this->prefix = $prefix;
-    }
-
-    public function init() {
-        $prefix        = $this->prefix;
-        $admin_menu    = $this->admin_menu;
-        $admin_submenu = $this->admin_submenu;
-        $settings      = $this->settings;
-        //$sections = $sections
-        $admin = new HGod_Admin($admin_menu, $admin_submenu, $settings);
     }
 
     /**
@@ -134,6 +165,20 @@ class HB_Admin {
         $this->sections        = $sections;
         $settings['sections']  = $sections;
         $this->settings        = $settings;
+    }
+
+    /**
+     * Init class HGod_Admin
+     *
+     * @return void
+     */
+    public function init() {
+        $prefix        = $this->prefix;
+        $admin_menu    = $this->admin_menu;
+        $admin_submenu = $this->admin_submenu;
+        $settings      = $this->settings;
+        //$sections = $sections
+        $admin = new HGod_Admin($admin_menu, $admin_submenu, $settings);
     }
 
     /**

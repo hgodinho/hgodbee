@@ -18,7 +18,6 @@
  * Requires
  */
 require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-loads.php';
-require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-tax.php';
 
 require dirname(__FILE__) . '/inc/beefree/BeeFree.php';
 require_once dirname(__FILE__) . '/templates/parts/bee-plugin-notification.php';
@@ -26,6 +25,7 @@ include_once dirname(__FILE__) . '/functions/hgodbee-ajax.php';
 
 require_once dirname(__FILE__) . '/admin/class-hb-admin.php';
 require_once dirname(__FILE__) . '/class/class-hb-cpt.php';
+require_once dirname(__FILE__) . '/class/class-hb-tax.php';
 
 /**
  * Classe principal
@@ -138,21 +138,24 @@ class HGodBee {
      * Construtor
      */
     private function __construct() {
-        define('HB_PREFIX', $this->prefix);
         $this->config();
 
-        if (class_exists('HGod_tax')) {
-            $this->set_tax();
+        $prefix = $this->prefix;
+
+        if (class_exists('HB_Tax')) {
+            $tax = new HB_Tax($prefix);
+            $tax->set_tax();
+            $tax->init();
         }
 
         if (class_exists('HB_Cpt')) {   
-            $cpt = new HB_Cpt($this->prefix);
+            $cpt = new HB_Cpt($prefix);
             $cpt->set_cpt();
             $cpt->init();
         }
 
         if ( class_exists('HB_Admin')) {
-            $admin = new HB_Admin($this->prefix);
+            $admin = new HB_Admin($prefix);
             $admin->set_admin();
             $admin->init();
         }
@@ -188,6 +191,7 @@ class HGodBee {
         $this->plugin_dir = dirname(__FILE__);
         define('HB_VERSION', $this->version);
         define('HB_TXTDOMAIN', $this->txt_domain);
+        define('HB_PREFIX', $this->prefix);
 
         /**
          * Configurações gerais.
@@ -202,26 +206,20 @@ class HGodBee {
         /**
          * Configura Taxonomias.
          */
-        $this->tax = include 'config/tax-config.php';
+        //$this->tax = include 'config/tax-config.php';
 
         /**
          * Configura Tags
          */
-        $this->tag = include 'config/tag-config.php';
+        //$this->tag = include 'config/tag-config.php';
 
         /**
          * Configura scripts
-         */
-        /**
-         * bootstrap
          */
         $this->scripts = include 'config/scripts-config.php';
 
         /**
          * Configura estilos
-         */
-        /**
-         * bootstrap
          */
         $this->styles = include 'config/styles-config.php';
 
@@ -314,8 +312,10 @@ class HGodBee {
      * uma nova instância da classe HGod_Tax
      *
      * @return void
+     * @deprecated 0.6.0
      */
     public function set_tax() {
+        /*
         $args = array(
             array(
                 'name'       => $this->tax['name'],
@@ -343,6 +343,9 @@ class HGodBee {
             ),
         );
         $tax = new HGod_Tax($args);
+        */
+        _deprecated_function( __FUNCTION__, '0.6.0', 'nothing' );
+        HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
     /**

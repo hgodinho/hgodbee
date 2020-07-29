@@ -1,5 +1,9 @@
 <?php
 /**
+ * Custom-post-types configurations
+ * @since 0.5.0
+ */
+/**
  * Requer a hgod/classes via composer
  */
 require_once dirname(__FILE__, 2) . '/vendor/hgod/classes/class-hgod-cpt.php';
