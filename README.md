@@ -10,6 +10,13 @@
 
 ## Changelog
 
+`0.7.0`
+
+- removed config/scripts-config.php
+- removed config/styles-config.php
+- added class/class-hb-scripts
+- minors changes on class-hgodbee.php
+
 `0.6.0`
 
 - removed config/tax-config.php config/tag-config.php
@@ -25,7 +32,6 @@
 
 - Removed config/cpt-config and minor changes in admin/class-hb-admin.php
 - minor changes in class-hgodbee.php
-
 
 `0.5.0`
 

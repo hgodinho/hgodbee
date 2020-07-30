@@ -3,7 +3,7 @@
  * @wordpress-plugin
  * Plugin Name: HGodBee
  * Description: Integração do beeplugin com o wordpress.org
- * Version: 0.5.2
+ * Version: 0.7.0
  * Author: hgodinho
  * Author URI: hgodinho.com
  * Text Domain: hgodbee
@@ -17,8 +17,6 @@
 /**
  * Requires
  */
-require dirname(__FILE__) . '/vendor/hgod/classes/class-hgod-loads.php';
-
 require dirname(__FILE__) . '/inc/beefree/BeeFree.php';
 require_once dirname(__FILE__) . '/templates/parts/bee-plugin-notification.php';
 include_once dirname(__FILE__) . '/functions/hgodbee-ajax.php';
@@ -26,6 +24,7 @@ include_once dirname(__FILE__) . '/functions/hgodbee-ajax.php';
 require_once dirname(__FILE__) . '/admin/class-hb-admin.php';
 require_once dirname(__FILE__) . '/class/class-hb-cpt.php';
 require_once dirname(__FILE__) . '/class/class-hb-tax.php';
+require_once dirname(__FILE__) . '/class/class-hb-scripts.php';
 
 /**
  * Classe principal
@@ -72,41 +71,6 @@ class HGodBee {
      * @var string
      */
     public $prefix = 'hgodbee_';
-
-    /**
-     * Post-type config array
-     *
-     * @var array
-     */
-    protected $cpt;
-
-    /**
-     * Taxonomy [Categoria] config array
-     *
-     * @var array
-     */
-    protected $tax;
-
-    /**
-     * Taxonomy [Tag] config array
-     *
-     * @var array
-     */
-    protected $tag;
-
-    /**
-     * Scripts config array
-     *
-     * @var array
-     */
-    protected $scripts;
-
-    /**
-     * Styles config array
-     *
-     * @var array
-     */
-    protected $styles;
 
     /**
      * Email page
@@ -160,8 +124,10 @@ class HGodBee {
             $admin->init();
         }
 
-        if (class_exists('HGod_loads')) {
-            $this->set_loads();
+        if (class_exists('HB_Scripts')) {
+            $scripts = new HB_Scripts($prefix);
+            $scripts->set_loads();
+            $scripts->init();
         }
 
         $slug_exists = $this->the_slug_exists('bee-email-editor', 'page');
@@ -197,31 +163,6 @@ class HGodBee {
          * Configurações gerais.
          */
         $this->config = include 'config/config.php';
-
-        /**
-         * Configura CPT.
-         */
-        //$this->cpt = include 'config/cpt-config.php';
-
-        /**
-         * Configura Taxonomias.
-         */
-        //$this->tax = include 'config/tax-config.php';
-
-        /**
-         * Configura Tags
-         */
-        //$this->tag = include 'config/tag-config.php';
-
-        /**
-         * Configura scripts
-         */
-        $this->scripts = include 'config/scripts-config.php';
-
-        /**
-         * Configura estilos
-         */
-        $this->styles = include 'config/styles-config.php';
 
         /**
          * Email Editor Page
@@ -266,8 +207,10 @@ class HGodBee {
      * uma nova instância da classe HGod_Loads
      *
      * @return void
+     * @deprecated 0.7.0
      */
     public function set_loads() {
+        /*
         $args = array(
             'scripts' => $this->scripts,
             'styles'  => $this->styles,
@@ -276,27 +219,37 @@ class HGodBee {
         $loads = new HGod_Loads($args);
         add_action('admin_enqueue_scripts', array($this, 'admin_localize_scripts'));
         add_action('wp_enqueue_scripts', array($this, 'public_localize_scripts'));
+        */
+        _deprecated_function( __FUNCTION__, '0.7.0', 'nothing' );
+        HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
     /**
      * Localize Scripts for use on ajax-admin.js
      *
      * @return void
+     * @deprecated 0.7.0
      */
     public function admin_localize_scripts() {
+        /*
         $ajax_object = array(
             'ajax_url'    => admin_url('admin-ajax.php'),
             'nonce_admin' => wp_create_nonce($this->config['prefix'] . 'admin'),
         );
         $localized = wp_localize_script($this->scripts['admin_ajax']['handle'], $this->config['prefix'] . 'object', $ajax_object);
+        */
+        _deprecated_function( __FUNCTION__, '0.7.0', 'nothing' );
+        HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
     /**
      * Localize Scripts for use on bee-app.js
      *
      * @return void
+     * @deprecated 0.7.0
      */
     public function public_localize_scripts() {
+        /*
         $ajax_object = array(
             'token'                  => get_option($this->config['prefix'] . 'token'),
             'ajax_url'               => admin_url('admin-ajax.php'),
@@ -305,6 +258,9 @@ class HGodBee {
             'nonce_save_as_template' => wp_create_nonce($this->config['prefix'] . 'save_as_template'),
         );
         $localized = wp_localize_script($this->scripts['bee_app']['handle'], $this->config['prefix'] . 'object', $ajax_object);
+        */
+        _deprecated_function( __FUNCTION__, '0.7.0', 'nothing' );
+        HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
     /**
