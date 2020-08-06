@@ -16,6 +16,7 @@ if (is_user_logged_in()) {
     );
     $templates = new WP_Query($args);
     if ($templates->have_posts()) {
+        hgodbee_beeplugin_notification_area();
         ?>
 <div class="ui container">
     <h2 class="ui header">Selecione um template.</h2>

@@ -6,18 +6,22 @@ function hgodbee_modal_template_save() {
     global $post;
     if ('comece-do-zero' === $post->post_name ) {
         $title = '';
+        $templateID = '';
     } else {
-        $title = get_the_title(  );
+        $title = get_the_title();
+        $templateID = get_the_ID();
     }
     ?>
 <div class="ui tiny modal" id="templateSave" tabindex="-1" role="dialog" aria-labelledby="templateSaveLabel"
     aria-hidden="true">
     <i class="close icon"></i>
-    <div class="modal-header">
+    <div class="content">
         <h2 class="header" id="templateSaveLabel">Salvar template</h2>
     </div>
     <div class="content">
         <form id="salvaTemplateForm" class="ui form">
+            <input type="hidden" id="templateID" name="templateID" value="<?php echo $templateID ?>">
+
             <div class="field">
                 <label for="nomeTemplate"><strong>Nome do template</strong></label>
                 <input type="text" class="form-control" name="nomeTemplate" id="nomeTemplate" value="<?php echo $title?>" required>
@@ -71,6 +75,10 @@ function hgodbee_modal_template_save() {
         </form>
     </div>
     <div class="actions">
+        <div id="salvarNovoBTN" class="ui left olive labeled icon approve button hgobee-modal _new_button">
+            <i class="left plus circle icon"></i>
+            Salvar novo
+            </div>
         <div id="salvarTemplateBTN" class="ui approve teal button">Salvar</div>
         <div class="ui cancel basic red button">Continuar editando</div>
     </div>

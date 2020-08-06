@@ -19,3 +19,14 @@
 ._margin-top-3{
 	margin-top: 3px!important;
 }
+
+
+.hgobee-modal {
+	z-index: 0;
+}
+
+._new_button {
+	position: absolute!important;
+    left: 0;
+    margin-left: 1.3em!important;
+}

@@ -1,14 +1,22 @@
 # HGodBee Plugin
 
-## ATENCAO NAO RODAR COMPOSER UPDATE ver item 3 todo
+## ATENCAO NAO RODAR COMPOSER UPDATE ver item 3 @todo
 
 ## Todo
 
 1. transformar as funções var_dump e file_data em uma classe especifica de debug e incluir outros métodos úteis,
 2. criar função de criar template vazio no início do plugin,
 3. MUITO IMPORTANTE merge a vendor/hgod/classes/class-hgod-admin.php com o github principal. MUITO IMPORTANTE
+4. Mudar as validacões de seguranca e user capabilities, tirar das funcoes ajax e passar para o template
+5. deprecate HGod_Loads from vendor
 
 ## Changelog
+
+`0.8.0`
+
+- deprecated some methods from class-hgodbee.php
+- complete redesign of HB_Scripts
+- improvements on the ui
 
 `0.7.0`
 

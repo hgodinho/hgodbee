@@ -3,7 +3,7 @@
 function hgodbee_plugin_card($terms) {
     global $post;
 ?>
-<div class="column">
+<div class="column templates template-<?php echo get_the_ID();?> ">
     <div class="ui teal fluid raised card">
         <div class="content">
             <i class="right floated star icon"></i>
@@ -27,7 +27,7 @@ function hgodbee_plugin_card($terms) {
             }
             ?>
             <a href="<?php echo $edit_url; ?>" class="ui teal button">Editar</a>
-            <a href="<?php the_permalink();?>" class="ui red icon button"><span
+            <a href="#" id="<?php echo get_the_ID(); ?>" class="ui red icon button delete"><span
                     class="dashicons dashicons-trash"></span></a>
         </div>
     </div>

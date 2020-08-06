@@ -3,7 +3,7 @@
  * @wordpress-plugin
  * Plugin Name: HGodBee
  * Description: Integração do beeplugin com o wordpress.org
- * Version: 0.7.0
+ * Version: 0.8.0
  * Author: hgodinho
  * Author URI: hgodinho.com
  * Text Domain: hgodbee
@@ -112,13 +112,13 @@ class HGodBee {
             $tax->init();
         }
 
-        if (class_exists('HB_Cpt')) {   
+        if (class_exists('HB_Cpt')) {
             $cpt = new HB_Cpt($prefix);
             $cpt->set_cpt();
             $cpt->init();
         }
 
-        if ( class_exists('HB_Admin')) {
+        if (class_exists('HB_Admin')) {
             $admin = new HB_Admin($prefix);
             $admin->set_admin();
             $admin->init();
@@ -135,10 +135,12 @@ class HGodBee {
             $this->on_activation();
         }
 
+        add_action('wp_ajax_hgodbee_token', 'hgodbee_token');
         add_action('wp_ajax_hgodbee_save_template', 'hgodbee_save_template');
         add_action('wp_ajax_hgodbee_save', 'hgodbee_save');
-        add_action('wp_ajax_hgodbee_token', 'hgodbee_token');
-
+        add_action('wp_ajax_hgodbee_save_new', 'hgodbee_save_new');
+        add_action('wp_ajax_hgodbee_delete', 'hgodbee_delete');
+        
         add_filter('query_vars', array($this, 'custom_query_vars'));
 
         //register_activation_hook(__FILE__, array($this, 'on_activation'));
@@ -212,15 +214,15 @@ class HGodBee {
     public function set_loads() {
         /*
         $args = array(
-            'scripts' => $this->scripts,
-            'styles'  => $this->styles,
+        'scripts' => $this->scripts,
+        'styles'  => $this->styles,
         );
 
         $loads = new HGod_Loads($args);
         add_action('admin_enqueue_scripts', array($this, 'admin_localize_scripts'));
         add_action('wp_enqueue_scripts', array($this, 'public_localize_scripts'));
-        */
-        _deprecated_function( __FUNCTION__, '0.7.0', 'nothing' );
+         */
+        _deprecated_function(__FUNCTION__, '0.7.0', 'nothing');
         HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
@@ -233,12 +235,12 @@ class HGodBee {
     public function admin_localize_scripts() {
         /*
         $ajax_object = array(
-            'ajax_url'    => admin_url('admin-ajax.php'),
-            'nonce_admin' => wp_create_nonce($this->config['prefix'] . 'admin'),
+        'ajax_url'    => admin_url('admin-ajax.php'),
+        'nonce_admin' => wp_create_nonce($this->config['prefix'] . 'admin'),
         );
         $localized = wp_localize_script($this->scripts['admin_ajax']['handle'], $this->config['prefix'] . 'object', $ajax_object);
-        */
-        _deprecated_function( __FUNCTION__, '0.7.0', 'nothing' );
+         */
+        _deprecated_function(__FUNCTION__, '0.7.0', 'nothing');
         HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
@@ -251,15 +253,15 @@ class HGodBee {
     public function public_localize_scripts() {
         /*
         $ajax_object = array(
-            'token'                  => get_option($this->config['prefix'] . 'token'),
-            'ajax_url'               => admin_url('admin-ajax.php'),
-            'nonce_send'             => wp_create_nonce($this->config['prefix'] . 'send'),
-            'nonce_save'             => wp_create_nonce($this->config['prefix'] . 'save'),
-            'nonce_save_as_template' => wp_create_nonce($this->config['prefix'] . 'save_as_template'),
+        'token'                  => get_option($this->config['prefix'] . 'token'),
+        'ajax_url'               => admin_url('admin-ajax.php'),
+        'nonce_send'             => wp_create_nonce($this->config['prefix'] . 'send'),
+        'nonce_save'             => wp_create_nonce($this->config['prefix'] . 'save'),
+        'nonce_save_as_template' => wp_create_nonce($this->config['prefix'] . 'save_as_template'),
         );
         $localized = wp_localize_script($this->scripts['bee_app']['handle'], $this->config['prefix'] . 'object', $ajax_object);
-        */
-        _deprecated_function( __FUNCTION__, '0.7.0', 'nothing' );
+         */
+        _deprecated_function(__FUNCTION__, '0.7.0', 'nothing');
         HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
@@ -273,34 +275,34 @@ class HGodBee {
     public function set_tax() {
         /*
         $args = array(
-            array(
-                'name'       => $this->tax['name'],
-                'post_types' => array($this->cpt['name']),
-                'labels'     => array(
-                    'name'          => $this->tax['label'],
-                    'singular_name' => $this->tax['singular_name'],
-                    'menu_name'     => $this->tax['label'],
-                ),
-                'args'       => array(
-                    'hierarchical' => true,
-                ),
-            ),
-            array(
-                'name'       => $this->tag['name'],
-                'post_types' => array($this->cpt['name']),
-                'labels'     => array(
-                    'name'          => $this->tag['label'],
-                    'singular_name' => $this->tag['singular_name'],
-                    'menu_name'     => $this->tag['label'],
-                ),
-                'args'       => array(
-                    'hierarchical' => false,
-                ),
-            ),
+        array(
+        'name'       => $this->tax['name'],
+        'post_types' => array($this->cpt['name']),
+        'labels'     => array(
+        'name'          => $this->tax['label'],
+        'singular_name' => $this->tax['singular_name'],
+        'menu_name'     => $this->tax['label'],
+        ),
+        'args'       => array(
+        'hierarchical' => true,
+        ),
+        ),
+        array(
+        'name'       => $this->tag['name'],
+        'post_types' => array($this->cpt['name']),
+        'labels'     => array(
+        'name'          => $this->tag['label'],
+        'singular_name' => $this->tag['singular_name'],
+        'menu_name'     => $this->tag['label'],
+        ),
+        'args'       => array(
+        'hierarchical' => false,
+        ),
+        ),
         );
         $tax = new HGod_Tax($args);
-        */
-        _deprecated_function( __FUNCTION__, '0.6.0', 'nothing' );
+         */
+        _deprecated_function(__FUNCTION__, '0.6.0', 'nothing');
         HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
@@ -314,24 +316,24 @@ class HGodBee {
     public function set_cpt() {
         /*
         $args = array(
-            array(
-                'name' => $this->cpt['name'],
-                'args' => array(
-                    'label'        => $this->cpt['label'],
-                    'labels'       => array(
-                        'name'          => $this->cpt['label'],
-                        'singular_name' => $this->cpt['label'],
-                    ),
-                    'supports'     => array('title', 'editor', 'revisions', 'author', 'excerpt', 'page-attributes', 'thumbnail', 'custom-fields'),
-                    'taxonomies'   => array($this->tax['name'], $this->tag['name']),
-                    'public'       => false,
-                    'show_in_menu' => false,
-                ),
-            ),
+        array(
+        'name' => $this->cpt['name'],
+        'args' => array(
+        'label'        => $this->cpt['label'],
+        'labels'       => array(
+        'name'          => $this->cpt['label'],
+        'singular_name' => $this->cpt['label'],
+        ),
+        'supports'     => array('title', 'editor', 'revisions', 'author', 'excerpt', 'page-attributes', 'thumbnail', 'custom-fields'),
+        'taxonomies'   => array($this->tax['name'], $this->tag['name']),
+        'public'       => false,
+        'show_in_menu' => false,
+        ),
+        ),
         );
         $cpt = new HGod_Cpt($args);
-        */
-        _deprecated_function( __FUNCTION__, '0.5.0', 'nothing' );
+         */
+        _deprecated_function(__FUNCTION__, '0.5.0', 'nothing');
         HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
@@ -343,11 +345,11 @@ class HGodBee {
         /*
         global $post;
         if (is_post_type_archive($this->cpt['name'])) {
-            $archive_template = $this->cpt['archive_template'];
+        $archive_template = $this->cpt['archive_template'];
         }
         return $archive_template;
-        */
-        _deprecated_function( __FUNCTION__, '0.5.0', 'nothing' );
+         */
+        _deprecated_function(__FUNCTION__, '0.5.0', 'nothing');
         HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
     }
 
@@ -359,11 +361,11 @@ class HGodBee {
         /*
         global $post;
         if (is_singular($this->cpt['name'])) {
-            $single_template = $this->cpt['single_template'];
+        $single_template = $this->cpt['single_template'];
         }
         return $single_template;
-        */
-        _deprecated_function( __FUNCTION__, '0.5.0', 'nothing' );
+         */
+        _deprecated_function(__FUNCTION__, '0.5.0', 'nothing');
         HGodBee::hb_log(__FUNCTION__, 'deprecated function', __CLASS__, __METHOD__, __LINE__);
 
     }
@@ -485,8 +487,12 @@ class HGodBee {
     public function hb_log($msg, $title = '', $class = __CLASS__, $method = __METHOD__, $line = __LINE__) {
         //$error_dir = '/erro.log';
         $date = date('d.m.Y h:i:s');
-        $msg  = print_r($msg, true);
-        $log  = $method . " @linha-" . $line . " | " . $title . "\n" . $msg . "\n";
+        if (is_bool($msg)) {
+            $msg = print($msg);
+        } else {
+            $msg = print_r($msg, true);
+        }
+        $log = $method . " @linha-" . $line . " | " . $title . "\n" . $msg . "\n";
         error_log($log);
     }
 

@@ -10,9 +10,13 @@ var input_tags;
 
 (function ($) {
 	$(document).ready(function () {
+		/**
+		 * Close notifications on notification-area
+		 */
 		$(document).delegate('.message .close', 'click', function () {
 			$(this).closest('.message').transition('fade');
 		});
+
 		input_tags = $('input[name=tagsTemplate]')
 			.tagify()
 			.on('add', function (e, tagName) {
@@ -21,6 +25,48 @@ var input_tags;
 			.on('invalid', function (e, tagName) {
 				console.log(e);
 			});
+
+		$('.delete').click(function () {
+			var id = $(this).attr('id');
+			var columnCard = $('.templates.template-' + id);
+			var card = $(columnCard).children('.card');
+			card.dimmer('show');
+			var data = {
+				action: 'hgodbee_delete',
+				id: id,
+				nonce: hgodbee_object.nonce_delete,
+			};
+			$.post(ajaxURL, data, function (response) {
+					var notificationArea = document.getElementById(
+						'notification-area'
+					);
+
+					response = JSON.parse(response);
+
+					$('body').toast({
+						position: 'top left',
+						message: 'Deu certo',
+						title: 'Olha lá heim.',
+						displayTime: 0,
+						class: 'red',
+						className: {
+							toast: 'ui message'
+						},
+						showProgress: 'bottom',
+					})
+
+					if ( response.success == 1 ){
+						columnCard.fadeOut(function (){
+							card.dimmer('hide');
+							columnCard.remove();
+						})	
+					}
+
+					notificationArea.innerHTML = response.notification;
+				})
+				.done(function () {
+				});
+		});
 	});
 })(jQuery);
 
@@ -159,41 +205,76 @@ function BeeApp(token, bee_config, beetemplates) {
 		*/
 			(bee_config.onSave = function (jsonFile, htmlFile) {
 				jQuery('#templateSave').modal('show');
+				
 				jQuery('select.dropdown').dropdown();
+
 				jQuery('#salvarTemplateBTN').click(function () {
+					var templateID = jQuery('input[name=templateID').val();
 					var templateName = document.getElementById('nomeTemplate')
 						.value;
 					var categories = jQuery('#categoriasTemplate').val();
-					if (templateName == '') {
-						alert('O Nome precisa ser preenchido.');
+					var tags = input_tags.data('tagify').value;
+					if (templateName == '' || categories == '' || tags == '') {
+						alert('OPS! Parece que algum dos campos está vazio. Preencha todos os campos.');
 						return false;
 					} else {
 						var data = {
 							action: 'hgodbee_save',
+							id: templateID,
 							name: templateName,
 							json: jsonFile,
 							html: htmlFile,
 							categories: categories,
-							tags: input_tags.data('tagify').value,
+							tags: tags,
 							nonce: hgodbee_object.nonce_save,
 						};
 						jQuery
 							.post(ajaxURL, data, function (response) {
-								//alert(response);
-								//that.spinner.show();
 								var notificationArea = document.getElementById(
 									'notification-area'
 								);
 								notificationArea.innerHTML = response;
-								that.spinner.hide();
 							})
 							.done(function () {
-								that.spinner.show();
 								jQuery('#templateSave').modal('hide');
 							});
 					}
 				});
+
+				jQuery('#salvarNovoBTN').click(function (){
+
+					var templateName = document.getElementById('nomeTemplate')
+						.value;
+					var categories = jQuery('#categoriasTemplate').val();
+					var tags = input_tags.data('tagify').value;
+					if (templateName == '' || categories == '' || tags == '') {
+						alert('OPS! Parece que algum dos campos está vazio. Preencha todos os campos.');
+						return false;
+					} else {
+						var data = {
+							action: 'hgodbee_save_new',
+							name: templateName,
+							json: jsonFile,
+							html: htmlFile,
+							categories: categories,
+							tags: tags,
+							nonce: hgodbee_object.nonce_save,
+						};
+						jQuery
+							.post(ajaxURL, data, function (response) {
+								var notificationArea = document.getElementById(
+									'notification-area'
+								);
+								notificationArea.innerHTML = response;
+							})
+							.done(function () {
+								jQuery('#templateSave').modal('hide');
+							});
+					}
+				});
+
 			}),
+
 			(bee_config.onSaveAsTemplate = function (jsonFile) {
 				jQuery('#templateSave').modal('show');
 				jQuery('#salvarTemplateBTN').click(function () {
@@ -226,6 +307,7 @@ function BeeApp(token, bee_config, beetemplates) {
 					}
 				});
 			}),
+
 			(bee_config.onSend = function (htmlFile) {
 				jQuery('#enviaTeste').modal('show');
 				jQuery('#enviaTesteBTN').click(function () {
@@ -257,6 +339,7 @@ function BeeApp(token, bee_config, beetemplates) {
 					}
 				});
 			}),
+
 			(bee_config.onError = function (errorMessage) {
 				app.onError(errorMessage);
 			});

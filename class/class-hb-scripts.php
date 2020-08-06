@@ -3,10 +3,6 @@
  * Scripts & Styles Configurations
  * @since 0.7.0
  */
-/**
- * Requires /vendor/hgod/classes/class-hgod-loads.php
- */
-require_once dirname(__FILE__, 2) . '/vendor/hgod/classes/class-hgod-loads.php';
 
 /**
  * HB_Scripts
@@ -20,12 +16,11 @@ class HB_Scripts {
      */
     private $prefix;
 
-    /**
-     * Scripts and Styles
-     *
-     * @var array
-     */
-    public $scripts_styles;
+    public $wp_enqueue_scripts;
+    public $wp_enqueue_styles;
+    public $admin_enqueue_scripts;
+    public $hgodbee_menu;
+    public $hgodbee_menu_styles;
 
     /**
      * Construtor
@@ -47,32 +42,16 @@ class HB_Scripts {
 
         $prefix = $this->prefix;
 
-        $scripts = array(
-            'semantic_ui'       => array(
+        $this->wp_enqueue_scripts = array(
+            'fomantic_ui' => array(
                 'hook'      => 'wp_enqueue_scripts',
-                'handle'    => $prefix . 'semantic_ui_js',
-                'src'       => 'https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js',
+                'handle'    => $prefix . 'fomantic_ui_js',
+                'src'       => 'https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.6/dist/semantic.min.js',
                 'deps'      => array('jquery'),
                 'ver'       => HB_VERSION,
                 'in_footer' => false,
-            ), 
-            'admin_bootstrap' => array(
-                'hook'      => 'admin_enqueue_scripts',
-                'handle'    => $prefix . 'bootstrap_admin_js',
-                'src'       => dirname(plugin_dir_url(__FILE__)) . '/vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js',
-                'deps'      => array('jquery'),
-                'ver'       => HB_VERSION,
-                'in_footer' => true,
             ),
-            'admin_ajax'      => array(
-                'hook'      => 'load-toplevel_page_hgodbee_menu',
-                'handle'    => $prefix . 'admin_ajax_js',
-                'src'       => dirname(plugin_dir_url(__FILE__)) . '/js/ajax-admin.js',
-                'deps'      => array('jquery'),
-                'ver'       => HB_VERSION,
-                'in_footer' => true,
-            ),
-            'bee'             => array(
+            'bee'         => array(
                 'hook'      => 'wp_enqueue_scripts',
                 'handle'    => $prefix . 'core_bee_js',
                 'src'       => 'https://app-rsrc.getbee.io/plugin/BeePlugin.js',
@@ -80,7 +59,7 @@ class HB_Scripts {
                 'ver'       => HB_VERSION,
                 'in_footer' => true,
             ),
-            'bee_app'         => array(
+            'bee_app'     => array(
                 'hook'      => 'wp_enqueue_scripts',
                 'handle'    => $prefix . 'app_js',
                 'src'       => dirname(plugin_dir_url(__FILE__)) . '/js/bee-app.js',
@@ -88,7 +67,7 @@ class HB_Scripts {
                 'ver'       => HB_VERSION,
                 'in_footer' => true,
             ),
-            'tagify'         => array(
+            'tagify'      => array(
                 'hook'      => 'wp_enqueue_scripts',
                 'handle'    => $prefix . 'tagify_js',
                 'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/@yaireo/tagify/dist/jQuery.tagify.min.js',
@@ -98,24 +77,46 @@ class HB_Scripts {
             ),
         );
 
-        $styles = array(
-            'semantic_ui'       => array(
-                'hook'      => 'wp_enqueue_scripts',
-                'handle'    => $prefix . 'semantic_ui_css',
-                'src'       => 'https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css',
-                'deps'      => array(),
+        $this->admin_enqueue_scripts = array(
+            'admin_bootstrap' => array(
+                'hook'      => 'admin_enqueue_scripts',
+                'handle'    => $prefix . 'bootstrap_admin_js',
+                'src'       => dirname(plugin_dir_url(__FILE__)) . '/vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js',
+                'deps'      => array('jquery'),
                 'ver'       => HB_VERSION,
-                'in_footer' => false,
+                'in_footer' => true,
+            ),
+        );
+
+        $this->hgodbee_menu = array(
+            'admin_ajax'      => array(
+                'hook'      => 'load-toplevel_page_hgodbee_menu',
+                'handle'    => $prefix . 'admin_ajax_js',
+                'src'       => dirname(plugin_dir_url(__FILE__)) . '/js/ajax-admin.js',
+                'deps'      => array('jquery'),
+                'ver'       => HB_VERSION,
+                'in_footer' => true,
             ),
             'admin_bootstrap' => array(
-                'hook'      => 'load-toplevel_page_hgodbee_menu',
-                'handle'    => $prefix . 'bootstrap_admin_css',
-                'src'       => dirname(plugin_dir_url(__FILE__)) . '/vendor/twbs/bootstrap/dist/css/bootstrap.min.css',
+                'hook'      => 'admin_enqueue_scripts',
+                'handle'    => $prefix . 'bootstrap_admin_js',
+                'src'       => dirname(plugin_dir_url(__FILE__)) . '/vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js',
+                'deps'      => array('jquery'),
+                'ver'       => HB_VERSION,
+                'in_footer' => true,
+            ),
+        );
+
+        $this->wp_enqueue_styles = array(
+            'fomantic_ui' => array(
+                'hook'      => 'wp_enqueue_scripts',
+                'handle'    => $prefix . 'fomantic_ui_css',
+                'src'       => 'https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.6/dist/semantic.min.css',
                 'deps'      => array(),
                 'ver'       => HB_VERSION,
                 'in_footer' => false,
             ),
-            'bee_app'       => array(
+            'bee_app'     => array(
                 'hook'      => 'wp_enqueue_scripts',
                 'handle'    => $prefix . 'hgodbee_css',
                 'src'       => dirname(plugin_dir_url(__FILE__)) . '/css/hgodbee-styles.css',
@@ -123,7 +124,7 @@ class HB_Scripts {
                 'ver'       => HB_VERSION,
                 'in_footer' => false,
             ),
-            'tagify'       => array(
+            'tagify'      => array(
                 'hook'      => 'wp_enqueue_scripts',
                 'handle'    => $prefix . 'tagify_css',
                 'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/@yaireo/tagify/dist/tagify.css',
@@ -132,15 +133,18 @@ class HB_Scripts {
                 'in_footer' => false,
             ),
         );
-        
-        $scripts_styles = array(
-            'scripts' => $scripts,
-            'styles'  => $styles,
+
+        $this->hgodbee_menu_styles = array(
+            'admin_bootstrap' => array(
+                'hook'      => 'load-toplevel_page_hgodbee_menu',
+                'handle'    => $prefix . 'bootstrap_admin_css',
+                'src'       => dirname(plugin_dir_url(__FILE__)) . '/vendor/twbs/bootstrap/dist/css/bootstrap.min.css',
+                'deps'      => array(),
+                'ver'       => HB_VERSION,
+                'in_footer' => false,
+            ),
         );
-
-        $this->scripts_styles = $scripts_styles;
     }
-
 
     /**
      * Init class HGod_Loads and *_localize_scripts()
@@ -148,11 +152,149 @@ class HB_Scripts {
      * @return void
      */
     public function init() {
-        if ( isset($this->scripts_styles) ) {
-            $scripts_styles = $this->scripts_styles;
-            $loads = new HGod_Loads($scripts_styles);
-            add_action('admin_enqueue_scripts', array($this, 'admin_localize_scripts'));
-            add_action('wp_enqueue_scripts', array($this, 'public_localize_scripts'));
+        $prefix = $this->prefix;
+
+        add_action('wp_enqueue_scripts', array($this, 'loop_scripts_wp'));
+        add_action('wp_enqueue_scripts', array($this, 'loop_styles_wp'));
+
+        add_action('load-toplevel_page_hgodbee_menu', array($this, 'loop_scripts_hgodbee_menu'));
+        add_action('load-toplevel_page_hgodbee_menu', array($this, 'loop_styles_hgodbee_menu'));
+
+        add_action('admin_enqueue_scripts', array($this, 'admin_localize_scripts'));
+        add_action('wp_enqueue_scripts', array($this, 'public_localize_scripts'));
+
+        add_action('wp_print_scripts', array($this, 'remove_styles'));
+        add_action('wp_print_scripts', array($this, 'remove_scripts'));
+
+    }
+
+    /**
+     * Loop Scripts WP
+     *
+     * @return void
+     */
+    public function loop_scripts_wp() {
+        $wp_enqueue_scripts = $this->wp_enqueue_scripts;
+        $prefix             = $this->prefix;
+        if (is_singular($prefix . 'templates') || is_post_type_archive($prefix . 'templates')) {
+            foreach ($wp_enqueue_scripts as $script) {
+                $done = wp_register_script(
+                    $script['handle'],
+                    $script['src'],
+                    $script['deps'],
+                    $script['ver'],
+                    $script['in_footer']
+                );
+                if (!$done) {
+                    HGodBee::hb_var_dump($script['handle'] . '_not-registered', __CLASS__, __METHOD__, __LINE__, true);
+                }
+                wp_enqueue_script($script['handle']);
+            }
+        }
+    }
+
+    /**
+     * Loop Scripts no admin
+     *
+     * @return void
+     */
+    public function loop_scripts_hgodbee_menu() {
+        $hgodbee_menu = $this->hgodbee_menu;
+        $prefix       = $this->prefix;
+        foreach ($hgodbee_menu as $script) {
+            $done = wp_register_script(
+                $script['handle'],
+                $script['src'],
+                $script['deps'],
+                $script['ver'],
+                $script['in_footer']
+            );
+            if (!$done) {
+                HGodBee::hb_var_dump($script['handle'] . '_not-registered', __CLASS__, __METHOD__, __LINE__, true);
+            }
+            wp_enqueue_script($script['handle']);
+        }
+    }
+
+    /**
+     * Loop Styles no admin
+     *
+     * @return void
+     */
+    public function loop_styles_hgodbee_menu() {
+        $styles = $this->hgodbee_menu_styles;
+        $prefix       = $this->prefix;
+    
+        foreach ($styles as $style) {
+            //HGodBee::hb_var_dump($style, __CLASS__, __METHOD__, __LINE__, true);
+            $done = wp_register_style(
+                $style['handle'],
+                $style['src'],
+                $style['deps'],
+                $style['ver'],
+                $style['in_footer']
+            );
+            if (!$done) {
+                HGodBee::hb_var_dump($style['handle'] . '_not-registered', __CLASS__, __METHOD__, __LINE__, true);
+            }
+            wp_enqueue_style($style['handle']);
+        }
+    }
+
+    /**
+     * Loop Styles
+     *
+     * @return void
+     */
+    public function loop_styles_wp() {
+        $styles = $this->wp_enqueue_styles;
+        $prefix = $this->prefix;
+        //HGodBee::hb_var_dump($styles, __CLASS__, __METHOD__, __LINE__, true);
+        if (is_singular($prefix . 'templates') || is_post_type_archive($prefix . 'templates')) {
+            foreach ($styles as $style) {
+                $done = wp_register_style(
+                    $style['handle'],
+                    $style['src'],
+                    $style['deps'],
+                    $style['ver'],
+                    $style['in_footer']
+                );
+                if (!$done) {
+                    HGodBee::hb_var_dump($style['ver'], __CLASS__, __METHOD__, __LINE__, true);
+                }
+                wp_enqueue_style($style['handle']);
+
+            }
+        }
+    }
+
+    /**
+     * Remove Scripts
+     *
+     * @return void
+     */
+    public function remove_scripts() {
+        $prefix = $this->prefix;
+        if (is_post_type_archive($prefix . 'templates') || $prefix . 'templates' === get_post_type()) {
+            wp_dequeue_script('ui-a11y.js');
+            wp_deregister_script('ui-a11y.js');
+        }
+    }
+
+    /**
+     * Remove Styles
+     *
+     * @return void
+     */
+    public function remove_styles() {
+        $prefix = $this->prefix;
+        if (is_post_type_archive($prefix . 'templates') || $prefix . 'templates' === get_post_type()) {
+            wp_dequeue_style('stylesheet');
+            wp_dequeue_style('childstyle');
+            wp_dequeue_style('default_style');
+            wp_deregister_style('stylesheet');
+            wp_deregister_style('childstyle');
+            wp_deregister_style('default_style');
         }
     }
 
@@ -162,7 +304,7 @@ class HB_Scripts {
      * @return void
      */
     public function admin_localize_scripts() {
-        $prefix = $this->prefix;
+        $prefix      = $this->prefix;
         $ajax_object = array(
             'ajax_url'    => admin_url('admin-ajax.php'),
             'nonce_admin' => wp_create_nonce($prefix . 'admin'),
@@ -176,13 +318,14 @@ class HB_Scripts {
      * @return void
      */
     public function public_localize_scripts() {
-        $prefix = $this->prefix;
+        $prefix      = $this->prefix;
         $ajax_object = array(
             'token'                  => get_option($prefix . 'token'),
             'ajax_url'               => admin_url('admin-ajax.php'),
             'nonce_send'             => wp_create_nonce($prefix . 'send'),
             'nonce_save'             => wp_create_nonce($prefix . 'save'),
             'nonce_save_as_template' => wp_create_nonce($prefix . 'save_as_template'),
+            'nonce_delete'           => wp_create_nonce($prefix . 'delete'),
         );
         $localized = wp_localize_script($prefix . 'app_js', $prefix . 'object', $ajax_object);
     }
