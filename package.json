@@ -16,8 +16,16 @@
   },
   "homepage": "https://github.com/hgodinho/hgodbee#readme",
   "dependencies": {
-    "@yaireo/tagify": "^3.16.2"
+    "@yaireo/tagify": "^3.16.2",
+    "feather-icons": "^4.28.0",
+    "jszip": "^3.4.0",
+    "spectrum-colorpicker": "^1.8.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^3.9.0",
+    "@typescript-eslint/parser": "^3.9.0",
+    "eslint": "^7.6.0",
+    "typescript": "^3.9.7"
+  },
   "description": ""
 }

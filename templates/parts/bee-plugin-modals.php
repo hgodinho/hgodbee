@@ -12,79 +12,127 @@ function hgodbee_modal_template_save() {
         $templateID = get_the_ID();
     }
     ?>
-<div class="ui tiny modal" id="templateSave" tabindex="-1" role="dialog" aria-labelledby="templateSaveLabel"
+    <div class="ui tiny inverted modal" id="templateSave" tabindex="-1" role="dialog" aria-labelledby="templateSaveLabel"
+        aria-hidden="true">
+        <i class="close icon"></i>
+        <div class="content">
+            <h2 class="ui inverted header" id="templateSaveLabel"><span class="dashicons dashicons-admin-post icon"></span> <div class="content">Salvar template</div></h2>
+        </div>
+        <div class="content">
+            <form id="salvaTemplateForm" class="ui inverted form">
+                <input type="hidden" id="templateID" name="templateID" value="<?php echo $templateID ?>">
+
+                <div class="field">
+                    <label for="nomeTemplate"><strong>Nome do template</strong></label>
+                    <input type="text" class="form-control" name="nomeTemplate" id="nomeTemplate" value="<?php echo $title?>" required>
+                </div>
+
+                <div class="field">
+                    <?php
+                        $args = array(
+                            'taxonomy' => 'category',
+                            'orderby'  => 'name',
+                            'order'    => 'ASC',
+                        );
+                        $terms = new WP_Term_Query($args);
+                    ?>
+                    <label>Categorias</label>
+                    <?php
+                        $used_terms = get_the_terms( $post->ID, $config['prefix'] . 'tax' );
+                        $terms_in_use = array();
+                        foreach ( $used_terms as $used_term ){
+                            array_push($terms_in_use, $used_term->name );
+                        }
+                    ?>
+                    <select multiple id="categoriasTemplate" class="ui search dropdown"
+                        data-categories="<?php print_r($terms_in_use); ?>">
+                        <option value="">Selecione categorias</options>
+                            <?php
+                        foreach ( $terms->get_terms() as $term ) {
+                            if ( in_array( $term->name, $terms_in_use ) ){
+                                echo '<option value="' . $term->name . '" selected>' . $term->name . '</options>';
+                            } else {
+                                echo '<option value="' . $term->name . '">' . $term->name . '</options>';   
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <?php
+                    $tags_in_use = array();
+                    $tags       = wp_get_post_terms(get_the_ID(), $config['prefix'] . 'tag');
+                    foreach ( $tags as $tag ) {
+                        array_push($tags_in_use, $tag->name);
+                    }
+                    $tags_list = implode(', ', $tags_in_use);
+                    ?>
+                    <label for="tagsTemplate"><strong>Tags</strong></label>
+                    <input type="text" class="form-control" name="tagsTemplate" id="tagsTemplate" value="<?php echo $tags_list; ?> " required>
+                </div>
+
+            </form>
+        </div>
+        <div class="actions">
+            <div id="salvarNovoBTN" class="ui left olive labeled icon approve button hgobee-modal _new_button">
+                <i class="left plus circle icon"></i>
+                Salvar novo
+                </div>
+            <div id="salvarTemplateBTN" class="ui approve teal button">Salvar</div>
+            <div class="ui cancel basic red button">Continuar editando</div>
+        </div>
+    </div>
+    <?
+}
+
+
+function hgodbee_modal_template_download() {
+
+    $title = get_the_title();
+    $slug = basename(get_permalink(get_the_ID()));
+    
+    ?>
+    <div class="ui tiny inverted modal" id="templateDownload" tabindex="-1" role="dialog" aria-labelledby="templateDownloadLabel"
+        aria-hidden="true">
+        <i class="close icon"></i>
+        <div class="content">
+            <h2 class="ui inverted header" id="templateDownloadLabel"><span class="dashicons dashicons-download icon"></span> <div class="content">Baixar .zip</div></h2>
+        </div>
+        <div class="content">
+            <form id="dowloadTemplateForm" class="ui inverted form">
+            <input type="hidden" name="slugArquivo" id="slugArquivo" value="<?php echo $slug; ?>">
+                <div class="field">
+                    <label for="nomeArquivo"><strong>Nome do arquivo</strong></label>
+                    <input type="text" class="form-control" name="nomeArquivo" id="nomeArquivo" value="<?php echo $title?>" required>
+                </div>
+
+            </form>
+        </div>
+        <div class="actions">
+            <div id="downloadBTN" class="ui approve teal button">Baixar</div>
+            <div class="ui cancel basic red button">Continuar editando</div>
+        </div>
+    </div>
+    <?
+}
+
+function hgodbee_modal_template_delete() {
+?>
+<div class="ui tiny inverted modal" id="templateDelete" tabindex="-1" role="dialog" aria-labelledby="templateDeleteLabel"
     aria-hidden="true">
     <i class="close icon"></i>
     <div class="content">
-        <h2 class="header" id="templateSaveLabel">Salvar template</h2>
-    </div>
-    <div class="content">
-        <form id="salvaTemplateForm" class="ui form">
-            <input type="hidden" id="templateID" name="templateID" value="<?php echo $templateID ?>">
-
-            <div class="field">
-                <label for="nomeTemplate"><strong>Nome do template</strong></label>
-                <input type="text" class="form-control" name="nomeTemplate" id="nomeTemplate" value="<?php echo $title?>" required>
-            </div>
-
-            <div class="field">
-                <?php
-                    $args = array(
-                        'taxonomy' => 'category',
-                        'orderby'  => 'name',
-                        'order'    => 'ASC',
-                    );
-                    $terms = new WP_Term_Query($args);
-                ?>
-                <label>Categorias</label>
-                <?php
-                    $used_terms = get_the_terms( $post->ID, $config['prefix'] . 'tax' );
-                    $terms_in_use = array();
-                    foreach ( $used_terms as $used_term ){
-                        array_push($terms_in_use, $used_term->name );
-                    }
-                ?>
-                <select multiple id="categoriasTemplate" class="ui search dropdown"
-                    data-categories="<?php print_r($terms_in_use); ?>">
-                    <option value="">Selecione categorias</options>
-                        <?php
-                    foreach ( $terms->get_terms() as $term ) {
-                        if ( in_array( $term->name, $terms_in_use ) ){
-                            echo '<option value="' . $term->name . '" selected>' . $term->name . '</options>';
-                        } else {
-                            echo '<option value="' . $term->name . '">' . $term->name . '</options>';   
-                        }
-                    }
-                    ?>
-                </select>
-            </div>
-
-            <div class="field">
-                <?php
-                $tags_in_use = array();
-                $tags       = wp_get_post_terms(get_the_ID(), $config['prefix'] . 'tag');
-                foreach ( $tags as $tag ) {
-                    array_push($tags_in_use, $tag->name);
-                }
-                $tags_list = implode(', ', $tags_in_use);
-                ?>
-                <label for="tagsTemplate"><strong>Tags</strong></label>
-                <input type="text" class="form-control" name="tagsTemplate" id="tagsTemplate" value="<?php echo $tags_list; ?> " required>
-            </div>
-
-        </form>
+        <h2 class="ui inverted header" id="templateSaveLabel"><span class="dashicons dashicons-trash icon"></span> <div class="content">Tem certeza que deseja deletar este template?</div></h2>
     </div>
     <div class="actions">
-        <div id="salvarNovoBTN" class="ui left olive labeled icon approve button hgobee-modal _new_button">
-            <i class="left plus circle icon"></i>
-            Salvar novo
-            </div>
-        <div id="salvarTemplateBTN" class="ui approve teal button">Salvar</div>
-        <div class="ui cancel basic red button">Continuar editando</div>
+        <div id="deletarTemplateBTN" class="ui basic green button">Sim, deletar!</div>
+        <div class="ui cancel red button">Cancelar.</div>
     </div>
 </div>
 <?
 }
+
 
 function hgodbee_modal_send_test() {
     ?>

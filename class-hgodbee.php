@@ -3,7 +3,7 @@
  * @wordpress-plugin
  * Plugin Name: HGodBee
  * Description: Integração do beeplugin com o wordpress.org
- * Version: 0.8.0
+ * Version: 0.9.0
  * Author: hgodinho
  * Author URI: hgodinho.com
  * Text Domain: hgodbee

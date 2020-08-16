@@ -12,6 +12,11 @@
 
 ## Changelog
 
+`0.9.0`
+
+- multiple changes and adds
+- start js eslint configuration
+
 `0.8.0`
 
 - deprecated some methods from class-hgodbee.php

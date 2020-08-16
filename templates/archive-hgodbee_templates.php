@@ -7,6 +7,7 @@ wp_head();
 if (is_user_logged_in()) {
     $config = include dirname(plugin_dir_path(__FILE__)) . '/config/config.php';
     $card   = include plugin_dir_path(__FILE__) . 'parts/bee-plugin-card.php';
+    $modals = include plugin_dir_path(__FILE__) . 'parts/bee-plugin-modals.php';
     $args   = array(
         //'post_type'      => 'template_bee',
         'post_type'      => HB_PREFIX . 'templates',
@@ -17,26 +18,34 @@ if (is_user_logged_in()) {
     $templates = new WP_Query($args);
     if ($templates->have_posts()) {
         hgodbee_beeplugin_notification_area();
+        hgodbee_modal_template_delete();
         ?>
-<div class="ui container">
-    <h2 class="ui header">Selecione um template.</h2>
-    <div class="ui four column grid">
-        <?php
+<div class="hgodbee-container">
+    <div class="ui container">
+        <h2 class="ui huge center aligned inverted icon header _margin-bottom-4-100"><span class="dashicons dashicons-archive icon"></span></i>Selecione um template</h2>
+        <div class="ui four column grid">
+            <?php
 while ($templates->have_posts()) {
             $templates->the_post();
-            $terms        = get_the_terms(get_the_ID(), HB_PREFIX . 'tax');
-            $terms_in_use = array();
-            //HGodBee::hb_var_dump($terms, __CLASS__, __METHOD__, __LINE__, false);
-            if (has_term('', HB_PREFIX . 'tax')) {
-                foreach ($terms as $term) {
-                    array_push($terms_in_use, $term->name);
+            $taxs        = get_the_terms(get_the_ID(), HB_PREFIX . 'tax');
+            $tags        = get_the_terms(get_the_ID(), HB_PREFIX . 'tag');
+            $tags_in_use = array();
+            $taxs_in_use = array();
+
+            if (has_term('', HB_PREFIX . 'tax') &&  has_term('', HB_PREFIX . 'tag')) {
+                foreach ($taxs as $tax) {
+                    array_push($taxs_in_use, $tax->name);
                 }
-                hgodbee_plugin_card($terms_in_use);
+                foreach ($tags as $tag) {
+                    array_push($tags_in_use, $tag->name);
+                }
+                hgodbee_plugin_card($taxs_in_use, $tags_in_use);
             } else {
-                hgodbee_plugin_card('');
+                hgodbee_plugin_card('', '');
             }
         }
         ?>
+        </div>
     </div>
 </div>
 <?php

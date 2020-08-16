@@ -75,6 +75,38 @@ class HB_Scripts {
                 'ver'       => HB_VERSION,
                 'in_footer' => true,
             ),
+            'jszip'      => array(
+                'hook'      => 'wp_enqueue_scripts',
+                'handle'    => $prefix . 'jszip_js',
+                'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/jszip/dist/jszip.min.js',
+                'deps'      => array($prefix . 'app_js'),
+                'ver'       => HB_VERSION,
+                'in_footer' => true,
+            ),
+            'saveas'      => array(
+                'hook'      => 'wp_enqueue_scripts',
+                'handle'    => $prefix . 'saveas_js',
+                'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/jszip/vendor/FileSaver.js',
+                'deps'      => array($prefix . 'app_js', $prefix . 'jszip_js'),
+                'ver'       => HB_VERSION,
+                'in_footer' => true,
+            ),
+            'feather'      => array(
+                'hook'      => 'wp_enqueue_scripts',
+                'handle'    => $prefix . 'feather_js',
+                'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/feather-icons/dist/feather.min.js',
+                'deps'      => '',
+                'ver'       => HB_VERSION,
+                'in_footer' => true,
+            ),
+            'spectrum'      => array(
+                'hook'      => 'wp_enqueue_scripts',
+                'handle'    => $prefix . 'spectrum_js',
+                'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/spectrum-colorpicker/build/spectrum-min.js',
+                'deps'      => $prefix . 'app_js',
+                'ver'       => HB_VERSION,
+                'in_footer' => true,
+            ),
         );
 
         $this->admin_enqueue_scripts = array(
@@ -128,6 +160,14 @@ class HB_Scripts {
                 'hook'      => 'wp_enqueue_scripts',
                 'handle'    => $prefix . 'tagify_css',
                 'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/@yaireo/tagify/dist/tagify.css',
+                'deps'      => array(),
+                'ver'       => HB_VERSION,
+                'in_footer' => false,
+            ),
+            'spectrum'      => array(
+                'hook'      => 'wp_enqueue_scripts',
+                'handle'    => $prefix . 'spectrum_css',
+                'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/spectrum-colorpicker/spectrum.css',
                 'deps'      => array(),
                 'ver'       => HB_VERSION,
                 'in_footer' => false,
@@ -223,8 +263,8 @@ class HB_Scripts {
      */
     public function loop_styles_hgodbee_menu() {
         $styles = $this->hgodbee_menu_styles;
-        $prefix       = $this->prefix;
-    
+        $prefix = $this->prefix;
+
         foreach ($styles as $style) {
             //HGodBee::hb_var_dump($style, __CLASS__, __METHOD__, __LINE__, true);
             $done = wp_register_style(
@@ -322,6 +362,7 @@ class HB_Scripts {
         $ajax_object = array(
             'token'                  => get_option($prefix . 'token'),
             'ajax_url'               => admin_url('admin-ajax.php'),
+            'archive'                => get_post_type_archive_link(HB_PREFIX . 'templates'),
             'nonce_send'             => wp_create_nonce($prefix . 'send'),
             'nonce_save'             => wp_create_nonce($prefix . 'save'),
             'nonce_save_as_template' => wp_create_nonce($prefix . 'save_as_template'),
