@@ -17,6 +17,7 @@
   "homepage": "https://github.com/hgodinho/hgodbee#readme",
   "dependencies": {
     "@yaireo/tagify": "^3.16.2",
+    "css-element-queries": "^1.2.3",
     "feather-icons": "^4.28.0",
     "jszip": "^3.4.0",
     "spectrum-colorpicker": "^1.8.1"

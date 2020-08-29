@@ -6,7 +6,10 @@
 /**
  * Require vendor/hgod/classes/class-hgod-tax.php
  */
-require_once dirname(__FILE__, 2) . '/vendor/hgod/classes/class-hgod-admin.php';
+if ( ! class_exists('HGod_Admin') ){
+    require_once dirname(__FILE__, 2) . '/vendor/hgod/classes/class-hgod-admin.php';
+}
+
 
 /**
  * HB_Admin

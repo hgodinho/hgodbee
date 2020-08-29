@@ -6,8 +6,9 @@
 /**
  * Require /vendor/hgod/classes/class-hgod-tax.php
  */
-require_once dirname(__FILE__, 2) . '/vendor/hgod/classes/class-hgod-tax.php';
-
+if ( ! class_exists('HGod_Tax') ){
+    require_once dirname(__FILE__, 2) . '/vendor/hgod/classes/class-hgod-tax.php';
+}
 /**
  * HB_Tax
  */

@@ -14,8 +14,15 @@ function hgodbee_plugin_card($taxs, $tags) {
     <div class="ui teal fluid inverted card">
         <?php hgodbee_dimmer_carregando('card-dimmer'); ?>
         <div class="extra content">
-        <?php $icon_size = '1.2em'; ?>
-        <i class="right floated icon star" data-feather="star" width="<?php echo $icon_size; ?>"
+        <?php 
+        $icon_size = '1.2em'; 
+        $is_template = get_post_meta(get_the_ID(), HB_PREFIX . 'is_template', true);
+        $active = '';
+        if ( $is_template ) {
+            $active = 'active';
+        } 
+        ?>
+        <i class="right floated icon star template <?php echo $active?>" data-id="<?php echo get_the_ID(); ?>" data-feather="star" width="<?php echo $icon_size; ?>"
                         height="<?php echo $icon_size; ?>"></i>
             <div class="header"><?php echo get_the_title(); ?></div>
         </div>
@@ -72,7 +79,7 @@ $edit_url = add_query_arg('action', 'edit', get_permalink());
                         height="<?php echo $icon_size; ?>"></i></a>
             <a href="#" class="ui yellow icon button"><i class="icon" data-feather="archive" width="<?php echo $icon_size; ?>"
                         height="<?php echo $icon_size; ?>"></i></a>
-            <a href="#" id="<?php echo get_the_ID(); ?>" class="ui red icon button delete"><i data-feather="trash-2" width="<?php echo $icon_size; ?>"
+            <a href="#" id="<?php echo get_the_ID(); ?>" class="ui red icon button template-delete"><i data-feather="trash-2" width="<?php echo $icon_size; ?>"
                         height="<?php echo $icon_size; ?>"></i></a>
             <?php }
 	?>

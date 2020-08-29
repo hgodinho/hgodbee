@@ -1,5 +1,5 @@
 <?php
-//HGodBee::hb_var_dump(('im here'), __CLASS__, __METHOD__, __LINE__, true);
+// HGodBee::hb_var_dump(('im here'), __CLASS__, __METHOD__, __LINE__, true);
 /**
  * AJAX FUNCTIONS!
  */
@@ -51,18 +51,20 @@ function hgodbee_save_template() {
 			'ID'           => $page_id,
 			'post_content' => $json_template,
 			'post_excerpt' => $template_description,
+			'post_status'  => 'private',
 		);
 		wp_update_post($template_update);
 		hgodbee_beeplugin_notification('Template atulizado com sucesso', $template_name, 'teal');
 	} else {
 		if (current_user_can('edit_posts')) {
-			$saved = wp_insert_post(array(
-				'post_content' => $json_template,
-				'post_title'   => $template_name,
-				'post_excerpt' => $template_description,
-				'post_status'  => 'publish',
-				'post_type'    => $cpt,
-			)
+			$saved = wp_insert_post(
+				array(
+					'post_content' => $json_template,
+					'post_title'   => $template_name,
+					'post_excerpt' => $template_description,
+					'post_status'  => 'private',
+					'post_type'    => $cpt,
+				)
 			);
 			hgodbee_beeplugin_notification('Template criado com sucesso', $template_name, 'green');
 		} else {
@@ -102,14 +104,14 @@ function hgodbee_save() {
 				'ID'           => $template_ID,
 				'post_title'   => $template_name,
 				'post_content' => $json_template,
-				//'post_excerpt' => $template_description,
+				'post_status'  => 'private',
 			);
 			$saved = wp_update_post($template_update); // return (int|WP_Error) The post ID on success. The value 0 or WP_Error on failure.
 
 			/**
 			 * Salva o HTML no meta field
 			 */
-			$saved_html = update_post_meta($saved, HB_PREFIX . 'saved_html', $html_file); //return(int|bool) The new meta field ID if a field with the given key didn't exist and was therefore added, true on successful update, false on failure.
+			$saved_html = update_post_meta($saved, HB_PREFIX . 'saved_html', $html_file); // return(int|bool) The new meta field ID if a field with the given key didn't exist and was therefore added, true on successful update, false on failure.
 
 			/**
 			 * Adiciona e relaciona as categorias ao post que acabamos de adicionar
@@ -173,8 +175,7 @@ function hgodbee_save() {
 				array(
 					'post_content' => $json_template,
 					'post_title'   => $template_name,
-					//'post_excerpt' => $template_description,
-					'post_status'  => 'publish',
+					'post_status'  => 'private',
 					'post_type'    => $cpt,
 				)
 			);
@@ -231,10 +232,10 @@ function hgodbee_save() {
 			/**
 			 * Resposta Ajax
 			 */
-			$post     = get_post($saved);
+			$post     = get_post_field('post_name', $saved);
 			$response = array(
 				'success' => 2, // template criado
-				'message' => $template_name,
+				'message' => $post,
 			);
 			print json_encode($response);
 		}
@@ -242,15 +243,30 @@ function hgodbee_save() {
 		/**
 		 * Resposta Ajax
 		 */
-		$post     = get_post($saved);
+		//$post     = get_post( $saved );
 		$response = array(
 			'success' => 0, // erro
 			'message' => 'Você não tem permissão para fazer isso.',
 		);
 		print json_encode($response);
 	}
-	delete_transient('emakbee_autosave');
-	delete_transient('emakbee_user');
+	delete_transient(HB_PREFIX . 'autosave');
+
+	if (true === HB_DEBUG) {
+		$debug = array(
+			'nonce'        => $nonce,
+			'template_id'  => $template_ID,
+			'categories'   => $categories,
+			'tags'         => $tags,
+			'saved'        => $saved,
+			'saved_html'   => $saved_html,
+			'term_related' => $term_related,
+			'tag_related'  => $tag_related,
+			'response'     => $response,
+		);
+		HGodBee::hb_log($debug, 'debug', __CLASS__, __METHOD__, __LINE__);
+	}
+
 	wp_die();
 }
 
@@ -278,7 +294,7 @@ function hgodbee_save_new() {
 			array(
 				'post_content' => $json_template,
 				'post_title'   => $template_name,
-				'post_status'  => 'publish',
+				'post_status'  => 'private',
 				'post_type'    => $cpt,
 			)
 		);
@@ -384,5 +400,151 @@ function hgodbee_delete() {
 	} else {
 		print json_encode($response);
 	}
+	wp_die();
+}
+
+/**
+ * Salva Paleta de cores nas categorias do template
+ *
+ * @return void
+ */
+function hgodbee_save_colors() {
+	$nonce    = check_ajax_referer(HB_PREFIX . 'save_colors', 'nonce');
+	$paletas  = $_POST['palette'];
+	$response = array(
+		'success' => 0,
+	);
+	$true = 0;
+	foreach ($paletas as $paleta) {
+		$term = get_term_by('name', $paleta[0]['title'], HB_PREFIX . 'tax');
+		if (isset($paleta[0]['colors'])) {
+			$updated_term = update_term_meta($term->term_id, 'colors', $paleta[0]['colors']);
+			if (is_wp_error($updated_term)) {
+				$true = 0;
+			} else {
+				$true = 1;
+			}
+		} else {
+			$updated_term = update_term_meta($term->term_id, 'colors', '');
+			if (is_wp_error($updated_term)) {
+				$true = 0;
+			} else {
+				$true = 1;
+			}
+		}
+	}
+	if (1 === $true) {
+		$response = array(
+			'success' => 1,
+		);
+		print json_encode($response);
+	} else {
+		print json_encode($response);
+	}
+	wp_die();
+}
+
+/**
+ * Salva como template clicando no botão de estrela no arquivo de templates
+ *
+ * @return void
+ */
+function hgodbee_save_template_star_button() {
+	$nonce = check_ajax_referer(HB_PREFIX . 'save_as_template', 'nonce');
+	$id    = $_POST['id'];
+	$value = $_POST['value'];
+
+	$response = array(
+		'success' => 0,
+		'msg'     => 'Algo de errado não está certo.',
+	);
+
+	$is_template = get_post_meta($id, HB_PREFIX . 'is_template', true);
+
+	if (1 == $value) {
+		$insert = 1;
+	}
+	if (0 == $value) {
+		$insert = 0;
+	}
+	$template = update_post_meta($id, HB_PREFIX . 'is_template', $insert);
+
+	if (0 == $template) {
+		// false on failure or if the value is the same
+		$response = array(
+			'success' => 0,
+			'msg'     => 'Alguma coisa deu errado.',
+		);
+	}
+
+	if (1 == $template) {
+		// true on successful update
+		$response = array(
+			'success' => 1,
+			'msg'     => 'Atualizado.',
+		);
+	}
+
+	if ($template > 1) {
+		// true on successful insert
+		$response = array(
+			'success' => 2,
+			'msg'     => 'Marcado como favorito!',
+		);
+	}
+
+	$debug = array(
+		'nonce'       => $nonce,
+		'id'          => $id,
+		'value'       => $value,
+		'insert'      => $insert,
+		'is_template' => $is_template,
+		'template'    => $template,
+		'response'    => $response,
+	);
+	HGodBee::hb_log($debug, 'debug', __CLASS__, __METHOD__, __LINE__);
+	print json_encode($response);
+	wp_die();
+}
+
+/**
+ * Autosave chamado a cada 30segundos
+ *
+ * @return void
+ */
+function hgodbee_autosave() {
+	$nonce         = check_ajax_referer('hgodbee_autosave', 'nonce');
+	$json_template = $_POST['json'];
+	global $wpdb;
+
+	$user           = get_current_user_id();
+	$transient_name = 'hgodbee_autosave_' . $user;
+	$response       = array(
+		'success' => 0,
+		'msg'     => 'auto-save: ERROR!',
+	);
+
+	$transient = set_transient($transient_name, $json_template, 1 * YEAR_IN_SECONDS);
+
+	if ($transient) {
+		// true on successful update
+		$response = array(
+			'success' => 1,
+			'msg'     => 'auto-save: OK!',
+		);
+	}
+
+	if (true === HB_DEBUG) {
+		$debug = array(
+			'nonce'          => $nonce,
+			'user'           => $user,
+			'transient_name' => $transient_name,
+			'transient'      => $transient,
+			'response'       => $response,
+		);
+		HGodBee::hb_log($debug, 'debug', __CLASS__, __METHOD__, __LINE__);
+		print json_encode($response);
+	}
+
 	wp_die();
 }

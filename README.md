@@ -12,6 +12,10 @@
 
 ## Changelog
 
+`0.10.0` 
+
+- multiple changes and adds
+
 `0.9.0`
 
 - multiple changes and adds
