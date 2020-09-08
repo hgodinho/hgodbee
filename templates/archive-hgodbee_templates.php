@@ -1,7 +1,10 @@
 <?php
 /**
  * Arquivo de mailing
+ *
+ * @package hgodbee
  */
+
 wp_head();
 
 if ( is_user_logged_in() ) {
@@ -20,34 +23,30 @@ if ( is_user_logged_in() ) {
 	$templates  = new WP_Query( $args );
 	if ( $templates->have_posts() ) {
 		// hgodbee_dimmers();
-		// hgodbee_beeplugin_notification_area();
 		hgodbee_modal_template_delete();
 		?>
 <div class="hgodbee-container">
 	<div class="ui container">
 		<h2 class="ui huge center aligned inverted icon header _margin-bottom-4-100"><span class="dashicons dashicons-archive icon"></span></i>Selecione um template</h2>
-		
 		<?php
 		$user           = get_current_user_id();
 		$transient_name = HB_PREFIX . 'autosave_' . $user;
-		//$auto_salvo     = get_transient( $transient_name );
-		$auto_salvo = false;
+		$auto_salvo     = false;
 		if ( false !== $auto_salvo ) {
-			??
+			?>
 				<div class="ui equal width grid">
 					<div class="column">
-					<a href="<?php echo esc_html( get_the_permalink( HB_BLANK_ID ) ); ?>" class="fluid ui huge yellow button _margin-bottom-4-100">Comece do Zero!</a>				
+					<a href="<?php echo esc_html( get_the_permalink( HB_BLANK_ID ) ); ?>" class="fluid ui huge yellow button _margin-bottom-4-100">Comece do Zero!</a>
 					</div>
 					<div class="column">
 						<div class="ui grid">
 							<div class="ten wide column">
 								<div class="inverted content">
-									<span class="auto-salvo _user"><?php echo get_the_author_firstname(  ); ?><span>
-									
+									<span class="auto-salvo _user"><?php echo esc_html( get_the_author_meta( 'first_name' ) ); ?><span>
 								</div>
 							</div>
 							<div class="six wide column">
-							<a href="<?php echo esc_html( get_the_permalink( HB_BLANK_ID ) ); ?>" class="fluid ui huge purple button _margin-bottom-4-100">Comece do Zero!</a>				
+							<a href="<?php echo esc_html( get_the_permalink( HB_BLANK_ID ) ); ?>" class="fluid ui huge purple button _margin-bottom-4-100">Comece do Zero!</a>
 							</div>
 						</div>
 					</div>
@@ -55,12 +54,11 @@ if ( is_user_logged_in() ) {
 				<?php
 		} else {
 			?>
-<a href="<?php echo esc_html( get_the_permalink( HB_BLANK_ID ) ); ?>" class="fluid ui huge yellow button _margin-bottom-4-100">Comece do Zero!</a>
+		<a href="<?php echo esc_html( get_the_permalink( HB_BLANK_ID ) ); ?>" class="fluid ui huge yellow button _margin-bottom-4-100">Comece do Zero!</a>
 				<?php
 		}
 		?>
-		
-		
+
 		<div class="ui four column grid">
 			<?php
 			while ( $templates->have_posts() ) {
@@ -71,11 +69,11 @@ if ( is_user_logged_in() ) {
 						$taxs_in_use = array();
 
 				if ( has_term( '', HB_PREFIX . 'tax' ) && has_term( '', HB_PREFIX . 'tag' ) ) {
-					foreach ( $taxs as $tax ) {
-						array_push( $taxs_in_use, $tax->name );
+					foreach ( $taxs as $tax_template ) {
+						array_push( $taxs_in_use, $tax_template->name );
 					}
-					foreach ( $tags as $tag ) {
-						array_push( $tags_in_use, $tag->name );
+					foreach ( $tags as $tag_template ) {
+						array_push( $tags_in_use, $tag_template->name );
 					}
 					hgodbee_plugin_card( $taxs_in_use, $tags_in_use );
 				} else {
@@ -84,8 +82,8 @@ if ( is_user_logged_in() ) {
 			}
 			?>
 		</div>
-		
-		
+
+
 		<div class="hgodbee-pagination">
 			<?php
 			hgodbee_pagination( $templates );

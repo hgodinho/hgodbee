@@ -1,7 +1,9 @@
 <?php
 /**
  * Scripts & Styles Configurations
+ *
  * @since 0.7.0
+ * @package hgodbee
  */
 
 /**
@@ -21,6 +23,8 @@ class HB_Scripts {
 	public $admin_enqueue_scripts;
 	public $hgodbee_menu;
 	public $hgodbee_menu_styles;
+	public $hgodbee_menu_migracao;
+	public $hgodbee_menu_styles_migracao;
 
 	/**
 	 * Construtor
@@ -43,7 +47,7 @@ class HB_Scripts {
 		$prefix = $this->prefix;
 
 		$this->wp_enqueue_scripts = array(
-			'fomantic_ui' => array(
+			'fomantic_ui'   => array(
 				'hook'      => 'wp_enqueue_scripts',
 				'handle'    => $prefix . 'fomantic_ui_js',
 				'src'       => 'https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.6/dist/semantic.min.js',
@@ -51,7 +55,7 @@ class HB_Scripts {
 				'ver'       => HB_VERSION,
 				'in_footer' => false,
 			),
-			'bee'         => array(
+			'bee'           => array(
 				'hook'      => 'wp_enqueue_scripts',
 				'handle'    => $prefix . 'core_bee_js',
 				'src'       => 'https://app-rsrc.getbee.io/plugin/BeePlugin.js',
@@ -59,39 +63,31 @@ class HB_Scripts {
 				'ver'       => HB_VERSION,
 				'in_footer' => true,
 			),
-			'bee_app'     => array(
-				'hook'      => 'wp_enqueue_scripts',
-				'handle'    => $prefix . 'app_js',
-				'src'       => dirname(plugin_dir_url(__FILE__)) . '/js/bee-app.js',
-				'deps'      => array($prefix . 'core_bee_js', 'jquery'),
-				'ver'       => HB_VERSION,
-				'in_footer' => true,
-			),
-			'tagify'      => array(
+			'tagify'        => array(
 				'hook'      => 'wp_enqueue_scripts',
 				'handle'    => $prefix . 'tagify_js',
 				'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/@yaireo/tagify/dist/jQuery.tagify.min.js',
-				'deps'      => array($prefix . 'core_bee_js', 'jquery'),
+				'deps'      => '',
 				'ver'       => HB_VERSION,
 				'in_footer' => true,
 			),
-			'jszip'       => array(
+			'jszip'         => array(
 				'hook'      => 'wp_enqueue_scripts',
 				'handle'    => $prefix . 'jszip_js',
 				'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/jszip/dist/jszip.min.js',
-				'deps'      => array($prefix . 'app_js'),
+				'deps'      => '',
 				'ver'       => HB_VERSION,
 				'in_footer' => true,
 			),
-			'saveas'      => array(
+			'saveas'        => array(
 				'hook'      => 'wp_enqueue_scripts',
 				'handle'    => $prefix . 'saveas_js',
 				'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/jszip/vendor/FileSaver.js',
-				'deps'      => array($prefix . 'app_js', $prefix . 'jszip_js'),
+				'deps'      => '',
 				'ver'       => HB_VERSION,
 				'in_footer' => true,
 			),
-			'feather'     => array(
+			'feather'       => array(
 				'hook'      => 'wp_enqueue_scripts',
 				'handle'    => $prefix . 'feather_js',
 				'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/feather-icons/dist/feather.min.js',
@@ -99,19 +95,43 @@ class HB_Scripts {
 				'ver'       => HB_VERSION,
 				'in_footer' => true,
 			),
-			'spectrum'    => array(
+			'bee_app'       => array(
 				'hook'      => 'wp_enqueue_scripts',
-				'handle'    => $prefix . 'spectrum_js',
-				'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/spectrum-colorpicker/build/spectrum-min.js',
-				'deps'      => $prefix . 'app_js',
+				'handle'    => $prefix . 'app_js',
+				'src'       => dirname(plugin_dir_url(__FILE__)) . '/js/bee-app.js',
+				'deps'      => array('jquery', $prefix . 'fomantic_ui_js', $prefix . 'core_bee_js'),
 				'ver'       => HB_VERSION,
 				'in_footer' => true,
 			),
-			'resize_sensor'    => array(
+			'interface'     => array(
+				'hook'      => 'wp_enqueue_scripts',
+				'handle'    => $prefix . 'interface_js',
+				'src'       => dirname(plugin_dir_url(__FILE__)) . '/js/interface.js',
+				'deps'      => array('jquery', $prefix . 'fomantic_ui_js', $prefix . 'feather_js', $prefix . 'saveas_js', $prefix . 'jszip_js', $prefix . 'tagify_js', $prefix . 'app_js'),
+				'ver'       => HB_VERSION,
+				'in_footer' => true,
+			),
+			'color_palette' => array(
+				'hook'      => 'wp_enqueue_scripts',
+				'handle'    => $prefix . 'color_palette_js',
+				'src'       => dirname(plugin_dir_url(__FILE__)) . '/js/sidebar-color-palette.js',
+				'deps'      => array('jquery', $prefix . 'fomantic_ui_js'),
+				'ver'       => HB_VERSION,
+				'in_footer' => true,
+			),
+			'spectrum'      => array(
+				'hook'      => 'wp_enqueue_scripts',
+				'handle'    => $prefix . 'spectrum_js',
+				'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/spectrum-colorpicker/build/spectrum-min.js',
+				'deps'      => array($prefix . 'color_palette_js', $prefix . 'app_js'),
+				'ver'       => HB_VERSION,
+				'in_footer' => true,
+			),
+			'resize_sensor' => array(
 				'hook'      => 'wp_enqueue_scripts',
 				'handle'    => $prefix . 'resize_sensor_js',
 				'src'       => dirname(plugin_dir_url(__FILE__)) . '/node_modules/css-element-queries/src/ResizeSensor.js',
-				'deps'      => $prefix . 'app_js',
+				'deps'      => array($prefix . 'color_palette_js'),
 				'ver'       => HB_VERSION,
 				'in_footer' => true,
 			),
@@ -141,6 +161,25 @@ class HB_Scripts {
 				'hook'      => 'admin_enqueue_scripts',
 				'handle'    => $prefix . 'bootstrap_admin_js',
 				'src'       => dirname(plugin_dir_url(__FILE__)) . '/vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js',
+				'deps'      => array('jquery'),
+				'ver'       => HB_VERSION,
+				'in_footer' => true,
+			),
+		);
+
+		$this->hgodbee_menu_migracao = array(
+			'admin_ajax'     => array(
+				'hook'      => 'bee_page_',
+				'handle'    => $prefix . 'migracao_ajax_js',
+				'src'       => dirname(plugin_dir_url(__FILE__)) . '/js/migracao-admin.js',
+				'deps'      => array('jquery'),
+				'ver'       => HB_VERSION,
+				'in_footer' => true,
+			),
+			'admin_fomantic' => array(
+				'hook'      => 'bee_page_',
+				'handle'    => $prefix . 'fomantic_admin_js',
+				'src'       => 'https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.6/dist/semantic.min.js',
 				'deps'      => array('jquery'),
 				'ver'       => HB_VERSION,
 				'in_footer' => true,
@@ -192,6 +231,17 @@ class HB_Scripts {
 				'in_footer' => false,
 			),
 		);
+
+		$this->hgodbee_menu_styles_migracao = array(
+			'admin_fomantic' => array(
+				'hook'      => 'bee_page_',
+				'handle'    => $prefix . 'fomantic_admin_css',
+				'src'       => 'https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.6/dist/semantic.min.css',
+				'deps'      => array(),
+				'ver'       => HB_VERSION,
+				'in_footer' => false,
+			),
+		);
 	}
 
 	/**
@@ -202,18 +252,20 @@ class HB_Scripts {
 	public function init() {
 		$prefix = $this->prefix;
 
+		// Public.
 		add_action('wp_enqueue_scripts', array($this, 'loop_scripts_wp'));
 		add_action('wp_enqueue_scripts', array($this, 'loop_styles_wp'));
 
+		// Menu top level.
 		add_action('load-toplevel_page_hgodbee_menu', array($this, 'loop_scripts_hgodbee_menu'));
 		add_action('load-toplevel_page_hgodbee_menu', array($this, 'loop_styles_hgodbee_menu'));
 
+		// Localizes.
 		add_action('admin_enqueue_scripts', array($this, 'admin_localize_scripts'));
 		add_action('wp_enqueue_scripts', array($this, 'public_localize_scripts'));
 
-		add_action('wp_print_scripts', array($this, 'remove_styles'));
-		add_action('wp_print_scripts', array($this, 'remove_scripts'));
-
+		// add_action('wp_print_scripts', array($this, 'remove_styles'));
+		// add_action('wp_print_scripts', array($this, 'remove_scripts'));
 	}
 
 	/**
@@ -265,6 +317,29 @@ class HB_Scripts {
 	}
 
 	/**
+	 * Loop Scripts para admin migraçao
+	 *
+	 * @return void
+	 */
+	public function loop_scripts_hgodbee_menu_migracao() {
+		$hgodbee_menu_migracao = $this->hgodbee_menu_migracao;
+		$prefix                = $this->prefix;
+		foreach ($hgodbee_menu_migracao as $script) {
+			$done = wp_register_script(
+				$script['handle'],
+				$script['src'],
+				$script['deps'],
+				$script['ver'],
+				$script['in_footer']
+			);
+			if (!$done) {
+				HGodBee::hb_var_dump($script['handle'] . '_not-registered', __CLASS__, __METHOD__, __LINE__, true);
+			}
+			wp_enqueue_script($script['handle']);
+		}
+	}
+
+	/**
 	 * Loop Styles no admin
 	 *
 	 * @return void
@@ -274,7 +349,32 @@ class HB_Scripts {
 		$prefix = $this->prefix;
 
 		foreach ($styles as $style) {
-			//HGodBee::hb_var_dump($style, __CLASS__, __METHOD__, __LINE__, true);
+			// HGodBee::hb_var_dump($style, __CLASS__, __METHOD__, __LINE__, true);
+			$done = wp_register_style(
+				$style['handle'],
+				$style['src'],
+				$style['deps'],
+				$style['ver'],
+				$style['in_footer']
+			);
+			if (!$done) {
+				HGodBee::hb_var_dump($style['handle'] . '_not-registered', __CLASS__, __METHOD__, __LINE__, true);
+			}
+			wp_enqueue_style($style['handle']);
+		}
+	}
+
+	/**
+	 * Loop Styles no admin migrcao
+	 *
+	 * @return void
+	 */
+	public function loop_styles_hgodbee_menu_migracao() {
+		$styles = $this->hgodbee_menu_styles_migracao;
+		$prefix = $this->prefix;
+
+		foreach ($styles as $style) {
+			// HGodBee::hb_var_dump($style, __CLASS__, __METHOD__, __LINE__, true);
 			$done = wp_register_style(
 				$style['handle'],
 				$style['src'],
@@ -297,7 +397,7 @@ class HB_Scripts {
 	public function loop_styles_wp() {
 		$styles = $this->wp_enqueue_styles;
 		$prefix = $this->prefix;
-		//HGodBee::hb_var_dump($styles, __CLASS__, __METHOD__, __LINE__, true);
+		// HGodBee::hb_var_dump($styles, __CLASS__, __METHOD__, __LINE__, true);
 		if (is_singular($prefix . 'templates') || is_post_type_archive($prefix . 'templates')) {
 			foreach ($styles as $style) {
 				$done = wp_register_style(
@@ -311,7 +411,6 @@ class HB_Scripts {
 					HGodBee::hb_var_dump($style['ver'], __CLASS__, __METHOD__, __LINE__, true);
 				}
 				wp_enqueue_style($style['handle']);
-
 			}
 		}
 	}
@@ -366,18 +465,30 @@ class HB_Scripts {
 	 * @return void
 	 */
 	public function public_localize_scripts() {
-		$prefix      = $this->prefix;
-		$ajax_object = array(
-			'token'                  => get_option($prefix . 'token'),
-			'ajax_url'               => admin_url('admin-ajax.php'),
-			'archive'                => get_post_type_archive_link(HB_PREFIX . 'templates'),
-			'nonce_send'             => wp_create_nonce($prefix . 'send'),
-			'nonce_save'             => wp_create_nonce($prefix . 'save'),
-			'nonce_save_as_template' => wp_create_nonce($prefix . 'save_as_template'),
-			'nonce_delete'           => wp_create_nonce($prefix . 'delete'),
-			'nonce_save_colors'      => wp_create_nonce($prefix . 'save_colors'),
-			'nonce_autosave'      => wp_create_nonce($prefix . 'autosave'),
+		$prefix              = $this->prefix;
+		$ajax_object_bee_app = array(
+			'token'          => get_option($prefix . 'token'),
+			'ajax_url'       => admin_url('admin-ajax.php'),
+			'archive'        => get_post_type_archive_link($prefix . 'templates'),
+			'nonce_send'     => wp_create_nonce($prefix . 'send'),
+			'nonce_save'     => wp_create_nonce($prefix . 'save'),
+			'nonce_delete'   => wp_create_nonce($prefix . 'delete'),
+			'nonce_autosave' => wp_create_nonce($prefix . 'autosave'),
 		);
-		$localized = wp_localize_script($prefix . 'app_js', $prefix . 'object', $ajax_object);
+		$ajax_object_color_palette = array(
+			'ajax_url'          => admin_url('admin-ajax.php'),
+			'nonce_save_colors' => wp_create_nonce($prefix . 'save_colors'),
+		);
+		$ajax_object_interface = array(
+			'ajax_url'               => admin_url('admin-ajax.php'),
+			'archive'                => get_post_type_archive_link($prefix . 'templates'),
+			'nonce_send'             => wp_create_nonce($prefix . 'send'),
+			'nonce_star'             => wp_create_nonce($prefix . 'star'),
+			'nonce_delete'           => wp_create_nonce($prefix . 'delete'),
+		);
+		$localized   = wp_localize_script($prefix . 'app_js', $prefix . 'object', $ajax_object_bee_app);
+		$localized_2 = wp_localize_script($prefix . 'color_palette_js', $prefix . 'palette', $ajax_object_color_palette);
+		$localized_3 = wp_localize_script($prefix . 'interface_js', $prefix . 'interface', $ajax_object_interface);
+
 	}
 }

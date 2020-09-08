@@ -18,6 +18,7 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^0.6",
         "phpcompatibility/phpcompatibility-wp": "*",
         "wp-coding-standards/wpcs": "^0.14.0",
-        "automattic/vipwpcs": "*"
+        "automattic/vipwpcs": "*", 
+        "wp-cli/wp-cli-bundle": "*"
     }
 }

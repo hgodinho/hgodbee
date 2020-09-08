@@ -1,5 +1,9 @@
 <?php
 /**
+ * Hgodbee
+ *
+ * Plugin.
+ *
  * @wordpress-plugin
  * Plugin Name: HGodBee
  * Description: Integração do beeplugin com o wordpress.org
@@ -7,6 +11,7 @@
  * Author: hgodinho
  * Author URI: hgodinho.com
  * Text Domain: hgodbee
+ * GitHub Plugin URI: https://github.com/hgodinho/hgodbee
  *
  * @package HGodBee
  * @author Hgodinho
@@ -143,9 +148,9 @@ class HGodBee {
 		if ( ! $slug_exists ) {
 			$this->new_post( $this->start_page );
 		} else {
-            $blank = get_page_by_path( 'comece-do-zero', OBJECT, HB_PREFIX . 'templates' );
-            define( 'HB_BLANK_ID', $blank->ID );
-        }
+			$blank = get_page_by_path( 'comece-do-zero', OBJECT, HB_PREFIX . 'templates' );
+			define( 'HB_BLANK_ID', $blank->ID );
+		}
 
 		add_action( 'wp_ajax_hgodbee_token', 'hgodbee_token' );
 		add_action( 'wp_ajax_hgodbee_save_template', 'hgodbee_save_template' );
@@ -153,11 +158,12 @@ class HGodBee {
 		add_action( 'wp_ajax_hgodbee_save_new', 'hgodbee_save_new' );
 		add_action( 'wp_ajax_hgodbee_autosave', 'hgodbee_autosave' );
 		add_action( 'wp_ajax_hgodbee_delete', 'hgodbee_delete' );
-        add_action( 'wp_ajax_hgodbee_save_colors', 'hgodbee_save_colors' );
-        add_action( 'wp_ajax_hgodbee_save_template_star_button', 'hgodbee_save_template_star_button' );
+		add_action( 'wp_ajax_hgodbee_save_colors', 'hgodbee_save_colors' );
+		add_action( 'wp_ajax_hgodbee_save_template_star_button', 'hgodbee_save_template_star_button' );
+		add_action( 'wp_ajax_hgodbee_emakbee_migracao', 'hgodbee_emakbee_migracao' );
 
 		add_filter( 'query_vars', array( $this, 'custom_query_vars' ) );
-		add_filter('the_title', array($this, 'remove_private_prefix'));
+		add_filter( 'the_title', array( $this, 'remove_private_prefix' ) );
 
 		register_activation_hook( __FILE__, array( $this, 'on_activation' ) );
 		// register_deactivation_hook(__FILE__, array($this, 'emakbee_desativacao'));
@@ -189,7 +195,7 @@ class HGodBee {
 		$blank            = dirname( __FILE__ ) . '/templates/blank-template.json';
 		$this->start_page = array(
 			'post_title'   => 'Comece do Zero!',
-			'post_content' => file_get_contents( $blank ),
+			'post_content' => wp_remote_get( $blank ),
 			'post_status'  => 'private',
 			'post_author'  => get_current_user_ID(),
 			'post_type'    => HB_PREFIX . 'templates',
@@ -199,44 +205,44 @@ class HGodBee {
 	/**
 	 * Custom query vars
 	 *
-	 * @param array $qvars
-	 * @return array $qvars modified with included query vars
+	 * @param array $qvars initial.
+	 * @return array $qvars modified with included query vars.
 	 */
 	public function custom_query_vars( $qvars ) {
 		$qvars[] = 'action';
 		return $qvars;
 	}
 
-    /**
-     * remove_private_prefix($title)
-     * 
-     * remove a string 'Privado: ' do $title do cpt template_bee
-     *
-     * @param $title
-     * @return $title
-     */
-    public function remove_private_prefix($title) {
-		
+	/**
+	 * Remove private prefix
+	 *
+	 * Remove a string 'Privado: ' do $title do cpt template_bee.
+	 *
+	 * @param $title Titulo.
+	 * @return $title Titulo.
+	 */
+	public function remove_private_prefix( $title ) {
+
 		$cpt = $this->cpt->cpts[0]['name'];
-		
-		if ( $cpt === get_post_type(  )){
-            $title = attribute_escape( $title );
 
-            $findthesse = array(
-                '#Privado:#',
-            );
+		if ( get_post_type() === $cpt ) {
+			$title = esc_attr( $title );
 
-            $replacewith = array(
-                '',
-            );
+			$findthesse = array(
+				'#Privado:#',
+			);
 
-            $title = preg_replace($findthesse, $replacewith, $title);
-            return $title;
-        } else {
-            return $title;
+			$replacewith = array(
+				'',
+			);
+
+			$title = preg_replace( $findthesse, $replacewith, $title );
+			return $title;
+		} else {
+			return $title;
 		}
-		
-    }
+
+	}
 
 	/**
 	 * Callbacks na ativação do plugin
@@ -245,8 +251,7 @@ class HGodBee {
 	 */
 	private function on_activation() {
 		$start_page = $this->start_page;
-		// $email      = $this->new_post($email_page);
-		$post = wp_insert_post( $start_page );
+		$post       = wp_insert_post( $start_page );
 		self::hb_log( $post, 'serasefoi' );
 	}
 
@@ -254,7 +259,6 @@ class HGodBee {
 	 * Cria nova página com os parâmetros passados
 	 *
 	 * @param array $args | Definições de nova página.
-	 * @return (int|WP_Error) The post ID on success. The value 0 or WP_Error on failure.
 	 */
 	public function new_post( $args ) {
 		global $wpdb;
@@ -267,12 +271,14 @@ class HGodBee {
 			'post_type'    => 'page',
 		);
 		$arg      = wp_parse_args( $args, $defaults );
-        $post     = wp_insert_post( $arg );
+		$post     = wp_insert_post( $arg );
 	}
 
 	/**
 	 * Faz a validação se as páginas existem ou não
 	 *
+	 * @param string $post_name Nome do post.
+	 * @param string $post_type Tipo de post.
 	 * @return boolean
 	 */
 	public function the_slug_exists( $post_name, $post_type ) {
@@ -358,11 +364,17 @@ class HGodBee {
 	}
 
 	/**
-	 * hgod_log
+	 * Bb log
+	 *
+	 * @param mixed  $msg Erro.
+	 * @param string $title Título do erro.
+	 * @param string $class Classe do erro.
+	 * @param string $method Método do erro.
+	 * @param string $line Linha do erro.
+	 * @return void
 	 */
 	public function hb_log( $msg, $title = '', $class = __CLASS__, $method = __METHOD__, $line = __LINE__ ) {
-		// $error_dir = '/erro.log';
-		$date = date( 'd.m.Y h:i:s' );
+		$date = gmdate( 'd.m.Y h:i:s' );
 		if ( is_bool( $msg ) ) {
 			$msg = print( $msg );
 		} else {

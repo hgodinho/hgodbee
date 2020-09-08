@@ -12,7 +12,14 @@
 
 ## Changelog
 
-`0.10.0` 
+`0.10.1`
+
+- separacao do javascript em arquivos para facilitar a manutencao
+- phpcs
+- eslint
+- alteracao da ordem dos scripts em class-hb-scripts.php
+
+`0.10.0`
 
 - multiple changes and adds
 

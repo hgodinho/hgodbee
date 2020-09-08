@@ -40,6 +40,8 @@ function hgodbee_accordion( $used_term ) {
 }
 
 function hgodbee_categoria_input( $all_template_terms, $template_terms ) {
+	//HGodBee::hb_var_dump($all_template_terms, __CLASS__, __METHOD__, __LINE__, false);
+	//HGodBee::hb_var_dump($template_terms, __CLASS__, __METHOD__, __LINE__, false);
 	?>
 	<form class="ui inverted form">
 
@@ -61,7 +63,6 @@ function hgodbee_categoria_input( $all_template_terms, $template_terms ) {
 								$term['name'] . 
 							'</option>';
 					}
-					
 					$categorias_clean = array_diff_assoc($all_template_terms, $template_terms);
 					foreach ( $categorias_clean as $categoria ) {
 						echo '<option value="' . 
