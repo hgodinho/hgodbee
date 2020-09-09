@@ -7,7 +7,7 @@
  * @wordpress-plugin
  * Plugin Name: HGodBee
  * Description: Integração do beeplugin com o wordpress.org
- * Version: 0.9.0
+ * Version: 0.10.2
  * Author: hgodinho
  * Author URI: hgodinho.com
  * Text Domain: hgodbee
@@ -195,7 +195,7 @@ class HGodBee {
 		$blank            = dirname( __FILE__ ) . '/templates/blank-template.json';
 		$this->start_page = array(
 			'post_title'   => 'Comece do Zero!',
-			'post_content' => wp_remote_get( $blank ),
+			'post_content' => file_get_contents( $blank ),
 			'post_status'  => 'private',
 			'post_author'  => get_current_user_ID(),
 			'post_type'    => HB_PREFIX . 'templates',
@@ -249,10 +249,10 @@ class HGodBee {
 	 *
 	 * @return void
 	 */
-	private function on_activation() {
+	public function on_activation() {
 		$start_page = $this->start_page;
 		$post       = wp_insert_post( $start_page );
-		self::hb_log( $post, 'serasefoi' );
+		flush_rewrite_rules();
 	}
 
 	/**

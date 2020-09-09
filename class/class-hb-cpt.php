@@ -43,7 +43,9 @@ class HB_Cpt {
 	 */
 	public function init() {
 		$cpts = $this->cpts;
-		$cpt  = new HGod_Cpt($cpts); // the class supports more than one cpt passed at once
+		if (class_exists('HGod_Cpt')){
+			$cpt  = new HGod_Cpt($cpts); // the class supports more than one cpt passed at once
+		}
 		add_filter('archive_template', array($this, 'set_custom_archive_template'));
 		add_filter('single_template', array($this, 'set_custom_single_template'));
 	}

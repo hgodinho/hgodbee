@@ -5,12 +5,17 @@
 ## Todo
 
 1. transformar as funções var_dump e file_data em uma classe especifica de debug e incluir outros métodos úteis,
-2. criar função de criar template vazio no início do plugin,
-3. MUITO IMPORTANTE merge a vendor/hgod/classes/class-hgod-admin.php com o github principal. MUITO IMPORTANTE
-4. Mudar as validacões de seguranca e user capabilities, tirar das funcoes ajax e passar para o template
-5. deprecate HGod_Loads from vendor
+2. Mudar as validacões de seguranca e user capabilities, tirar do template e passar para ajax
+3. deprecate HGod_Loads from vendor
 
 ## Changelog
+
+`0.10.2`
+
+- css reset
+- ajuste no json
+- ajuste na on_activation
+- ajuste na class-hb-cpt.php
 
 `0.10.1`
 
