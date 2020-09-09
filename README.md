@@ -10,6 +10,10 @@
 
 ## Changelog
 
+`0.10.3`
+
+- validacao de dev ou live
+
 `0.10.2`
 
 - css reset

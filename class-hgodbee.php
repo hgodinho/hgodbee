@@ -192,10 +192,15 @@ class HGodBee {
 		/**
 		 * Email Editor Page
 		 */
-		$blank            = dirname( __FILE__ ) . '/templates/blank-template.json';
+
+		if ( file_exists( dirname( __FILE__ ) . '/DEVMACHINE' ) ) {
+			$blank = file_get_contents( dirname( __FILE__ ) . '/templates/blank-template.json' );
+		} else {
+			$blank = file_get_contents( plugins_url( 'templates/blank-template.json', __FILE__ ) );
+		}
 		$this->start_page = array(
 			'post_title'   => 'Comece do Zero!',
-			'post_content' => file_get_contents( $blank ),
+			'post_content' => $blank,
 			'post_status'  => 'private',
 			'post_author'  => get_current_user_ID(),
 			'post_type'    => HB_PREFIX . 'templates',
