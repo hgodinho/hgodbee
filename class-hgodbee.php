@@ -192,12 +192,7 @@ class HGodBee {
 		/**
 		 * Email Editor Page
 		 */
-
-		if ( file_exists( dirname( __FILE__ ) . '/DEVMACHINE' ) ) {
-			$blank = file_get_contents( dirname( __FILE__ ) . '/templates/blank-template.json' );
-		} else {
-			$blank = file_get_contents( plugins_url( 'templates/blank-template.json', __FILE__ ) );
-		}
+		$blank = file_get_contents( dirname( __FILE__ ) . '/templates/json/blank-template.json' );
 		$this->start_page = array(
 			'post_title'   => 'Comece do Zero!',
 			'post_content' => $blank,
