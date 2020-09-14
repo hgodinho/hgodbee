@@ -10,6 +10,10 @@
 
 ## Changelog
 
+`0.11.2`
+
+- fix no usario no bee-plugin-card.php agora mostra o user_login
+
 `0.11.1`
 
 - bug fixes on hgodbee-ajax.php

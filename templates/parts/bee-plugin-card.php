@@ -20,7 +20,7 @@ function hgodbee_plugin_card( $taxs, $tags ) {
 	global $post;
 	$last_id = get_post_meta( get_the_ID(), '_edit_last', true );
 	if ( empty( $last_id ) ) {
-		$autor = get_the_author_meta( 'first_name' );
+		$autor = get_the_author_meta( 'user_login' );
 	} else {
 		$autor = get_the_modified_author();
 	}
