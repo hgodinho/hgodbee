@@ -7,8 +7,6 @@
 var ajaxURL = hgodbee_object.ajax_url;
 var input_tags;
 
-
-
 /**
  * Função para retornar o valor do parâmetro de url solicitado.
  */
@@ -22,9 +20,9 @@ var getUrlParameter = function getUrlParameter(sParam) {
         sParameterName = sURLVariables[i].split('=');
 
         if (sParameterName[0] === sParam) {
-            return sParameterName[1] === undefined ?
-                true :
-                decodeURIComponent(sParameterName[1]);
+            return sParameterName[1] === undefined
+                ? true
+                : decodeURIComponent(sParameterName[1]);
         }
     }
 };
@@ -53,7 +51,6 @@ function BeeApp(token, bee_config, beetemplates) {
     BeeApp.singleton.callbacks = {};
     var that = this;
     this.bee_config = bee_config;
-
 
     //beetemplates = JSON.parse(beetemplates);
 
@@ -127,213 +124,253 @@ function BeeApp(token, bee_config, beetemplates) {
                 })
                 .modal('show');
 
-            jQuery('#salvarTemplateBTN').unbind('click').click(function () {
-                event.preventDefault();
-                var templateID = jQuery('input[name=templateID').val();
-                var templateName = document.getElementById('nomeTemplate')
-                    .value;
-                var categories = [];
-                jQuery('#categoriasTemplate :selected').each(function() {
-                    categories.push(jQuery(this).text());
-                });
-                var tags = input_tags.data('tagify').value;
-                if (templateName == '' || categories == '' || tags == '') {
-                    alert(
-                        'OPS! Parece que algum dos campos está vazio. Preencha todos os campos.'
+            jQuery('#salvarTemplateBTN')
+                .unbind('click')
+                .click(function () {
+                    event.preventDefault();
+                    var templateID = jQuery('input[name=templateID').val();
+                    var templateName = document.getElementById(
+                        'nomeTemplate'
+                    ).value;
+                    var categories = [];
+                    jQuery('#categoriasTemplate :selected').each(
+                        function () {
+                            categories.push(jQuery(this).text());
+                        }
                     );
-                    return false;
-                } else {
-                    var data = {
-                        action: 'hgodbee_save',
-                        id: templateID,
-                        name: templateName,
-                        json: jsonFile,
-                        html: htmlFile,
-                        categories: categories,
-                        tags: tags,
-                        nonce: hgodbee_object.nonce_save,
-                    };
-                    
-                    jQuery
-                        .post(ajaxURL, data, function (response) {
-                            response = JSON.parse(response);
-                            if (response.success == 0) {
-                                jQuery('body').toast({
-                                    // erro
-                                    position: 'top left _margin-top-3-100',
-                                    message: response.message,
-                                    displayTime: 5000,
-                                    class: 'inverted red',
-                                    showProgress: 'bottom',
-                                });
-                            }
-                            if (response.success == 1) {
-                                // template atualizado
-                                jQuery('body').toast({
-                                    position: 'top left _margin-top-3-100',
-                                    message: response.message,
-                                    displayTime: 5000,
-                                    class: 'inverted teal',
-                                    showProgress: 'bottom',
-                                });
-                            }
-                            if (response.success == 2) {
-                                // template criado
-                                jQuery('body').toast({
-                                    position: 'top left _margin-top-3-100',
-                                    message: 'Template criado: ' +
-                                        response.message +
-                                        '\nredirecionando...',
-                                    displayTime: 5000,
-                                    class: 'inverted olive',
-                                    showProgress: 'bottom',
-                                });
-                                window.location.replace(
-                                    hgodbee_object.archive +
-                                    '/' +
-                                    response.message +
-                                    '?action=edit'
-                                );
-                            }
-                        })
-                        .done(function () {
-                            jQuery('#templateSave').modal('hide');
-                        });
-                        
-                }
-            });
+                    var tags = input_tags.data('tagify').value;
+                    if (
+                        templateName == '' ||
+                            categories == '' ||
+                            tags == ''
+                    ) {
+                        alert(
+                            'OPS! Parece que algum dos campos está vazio. Preencha todos os campos.'
+                        );
+                        return false;
+                    } else {
+                        var data = {
+                            action: 'hgodbee_save',
+                            id: templateID,
+                            name: templateName,
+                            json: jsonFile,
+                            html: htmlFile,
+                            categories: categories,
+                            tags: tags,
+                            nonce: hgodbee_object.nonce_save,
+                        };
 
-            jQuery('#salvarNovoBTN').unbind('click').click(function () {
-                event.preventDefault();
-                var templateName = document.getElementById('nomeTemplate')
-                    .value;
-                var categories = jQuery('#categoriasTemplate').val();
-                var tags = input_tags.data('tagify').value;
-                if (templateName == '' || categories == '' || tags == '') {
-                    alert(
-                        'OPS! Parece que algum dos campos está vazio. Preencha todos os campos.'
+                        jQuery
+                            .post(ajaxURL, data, function (response) {
+                                response = JSON.parse(response);
+                                if (response.success == 0) {
+                                    jQuery('body').toast({
+                                        // erro
+                                        position:
+                                                'top left _margin-top-3-100',
+                                        message: response.message,
+                                        displayTime: 5000,
+                                        class: 'inverted red',
+                                        showProgress: 'bottom',
+                                    });
+                                }
+                                if (response.success == 1) {
+                                    // template atualizado
+                                    jQuery('body').toast({
+                                        position:
+                                                'top left _margin-top-3-100',
+                                        message: response.message,
+                                        displayTime: 5000,
+                                        class: 'inverted teal',
+                                        showProgress: 'bottom',
+                                    });
+                                }
+                                if (response.success == 2) {
+                                    // template criado
+                                    jQuery('body').toast({
+                                        position:
+                                                'top left _margin-top-3-100',
+                                        message:
+                                                'Template criado: ' +
+                                                response.message +
+                                                '\nredirecionando...',
+                                        displayTime: 5000,
+                                        class: 'inverted olive',
+                                        showProgress: 'bottom',
+                                    });
+                                    window.location.replace(
+                                        hgodbee_object.archive +
+                                                '/' +
+                                                response.message +
+                                                '?action=edit'
+                                    );
+                                }
+                            })
+                            .done(function () {
+                                jQuery('#templateSave').modal('hide');
+                            });
+                    }
+                });
+
+            jQuery('#salvarNovoBTN')
+                .unbind('click')
+                .click(function () {
+                    event.preventDefault();
+                    var templateName = document.getElementById(
+                        'nomeTemplate'
+                    ).value;
+                    var categories = [];
+                    jQuery('#categoriasTemplate :selected').each(
+                        function () {
+                            categories.push(jQuery(this).text());
+                        }
                     );
-                    return false;
-                } else {
-                    var data = {
-                        action: 'hgodbee_save_new',
-                        name: templateName,
-                        json: jsonFile,
-                        html: htmlFile,
-                        categories: categories,
-                        tags: tags,
-                        nonce: hgodbee_object.nonce_save,
-                    };
-                    jQuery
-                        .post(ajaxURL, data, function (response) {
-                            response = JSON.parse(response);
-                            if (response.success == 1) {
+                    var categories = [];
+                    jQuery('#categoriasTemplate :selected').each(
+                        function () {
+                            categories.push(jQuery(this).text());
+                        }
+                    );
+                    var tags = input_tags.data('tagify').value;
+                    if (
+                        templateName == '' ||
+                            categories == '' ||
+                            tags == ''
+                    ) {
+                        alert(
+                            'OPS! Parece que algum dos campos está vazio. Preencha todos os campos.'
+                        );
+                        return false;
+                    } else {
+                        var data = {
+                            action: 'hgodbee_save_new',
+                            name: templateName,
+                            json: jsonFile,
+                            html: htmlFile,
+                            categories: categories,
+                            tags: tags,
+                            nonce: hgodbee_object.nonce_save,
+                        };
+                        jQuery
+                            .post(ajaxURL, data, function (response) {
+                                response = JSON.parse(response);
+                                if (response.success == 1) {
+                                    jQuery('body').toast({
+                                        position:
+                                                'top left _margin-top-3-100',
+                                        message:
+                                                '<strong>Template criado:</strong> ' +
+                                                response.message +
+                                                '\n...redirecionando',
+                                        displayTime: 5000,
+                                        class: 'inverted green',
+                                        showProgress: 'bottom',
+                                    });
+                                    window.location.replace(
+                                        hgodbee_object.archive +
+                                                '/' +
+                                                response.message +
+                                                '?action=edit'
+                                    );
+                                } else {
+                                    jQuery('body').toast({
+                                        position:
+                                                'top left _margin-top-3-100',
+                                        message: response.message,
+                                        displayTime: 5000,
+                                        class: 'inverted red',
+                                        showProgress: 'bottom',
+                                    });
+                                }
+                            })
+                            .done(function () {
+                                jQuery('#templateSave').modal('hide');
+                            });
+                    }
+                });
+        }),
+        (bee_config.onSaveAsTemplate = function (jsonFile) {
+            jQuery('#templateSave').modal('show');
+            jQuery('#salvarTemplateBTNnull')
+                .unbind('click')
+                .click(function () {
+                    event.preventDefault();
+                    var templateName = document.getElementById(
+                        'nomeTemplate'
+                    ).value;
+                    var templateDescription = document.getElementById(
+                        'descricaoTemplate'
+                    ).value;
+
+                    if (templateName == '' || templateDescription == '') {
+                        alert('Os campos precisam ser preenchidos.');
+                        return false;
+                    } else {
+                        var data = {
+                            action: 'hgodbee_save_template',
+                            name: templateName,
+                            dsc: templateDescription,
+                            json: jsonFile,
+                            nonce: hgodbee_object.nonce_save_as_template,
+                        };
+                        jQuery
+                            .post(ajaxURL, data, function (response) {
+                                //alert(response);
+                                var notificationArea = document.getElementById(
+                                    'notification-area'
+                                );
+                                notificationArea.innerHTML = response;
+                            })
+                            .done(jQuery('#templateSave').modal('hide'));
+                    }
+                });
+        }),
+        (bee_config.onSend = function (htmlFile) {
+            jQuery('#downloadBTN')
+                .unbind('click')
+                .click(function () {
+                    event.preventDefault();
+                    var nomeArquivo = document.getElementById('nomeArquivo')
+                        .value;
+                    var slug = document.getElementById('slugArquivo').value;
+                    if (slug !== 'comece-do-zero') {
+                        var zip = new JSZip();
+                        zip.file(nomeArquivo + '.html', htmlFile);
+                        zip.generateAsync({
+                            type: 'blob',
+                        }).then(
+                            function (content) {
                                 jQuery('body').toast({
                                     position: 'top left _margin-top-3-100',
-                                    message: '<strong>Template criado:</strong> ' +
-                                        response.message +
-                                        '\n...redirecionando',
+                                    message:
+                                            'O download iniciará em breve.',
                                     displayTime: 5000,
                                     class: 'inverted green',
                                     showProgress: 'bottom',
                                 });
-                                window.location.replace(
-                                    hgodbee_object.archive +
-                                    '/' +
-                                    response.message +
-                                    '?action=edit'
-                                );
-                            } else {
+                                saveAs(content, nomeArquivo + '.zip');
+                            },
+                            function (e) {
                                 jQuery('body').toast({
                                     position: 'top left _margin-top-3-100',
-                                    message: response.message,
+                                    message: e,
                                     displayTime: 5000,
                                     class: 'inverted red',
                                     showProgress: 'bottom',
                                 });
                             }
-                        })
-                        .done(function () {
-                            jQuery('#templateSave').modal('hide');
+                        );
+                    } else {
+                        jQuery('body').toast({
+                            position: 'top left _margin-top-3-100',
+                            message:
+                                    'Você não pode baixar um template vazio.',
+                            displayTime: 5000,
+                            class: 'inverted red',
+                            showProgress: 'bottom',
                         });
-                }
-            });
-        }),
-        (bee_config.onSaveAsTemplate = function (jsonFile) {
-            jQuery('#templateSave').modal('show');
-            jQuery('#salvarTemplateBTNnull').unbind('click').click(function () {
-                event.preventDefault();
-                var templateName = document.getElementById('nomeTemplate')
-                    .value;
-                var templateDescription = document.getElementById(
-                    'descricaoTemplate'
-                ).value;
-
-                if (templateName == '' || templateDescription == '') {
-                    alert('Os campos precisam ser preenchidos.');
-                    return false;
-                } else {
-                    var data = {
-                        action: 'hgodbee_save_template',
-                        name: templateName,
-                        dsc: templateDescription,
-                        json: jsonFile,
-                        nonce: hgodbee_object.nonce_save_as_template,
-                    };
-                    jQuery
-                        .post(ajaxURL, data, function (response) {
-                            //alert(response);
-                            var notificationArea = document.getElementById(
-                                'notification-area'
-                            );
-                            notificationArea.innerHTML = response;
-                        })
-                        .done(jQuery('#templateSave').modal('hide'));
-                }
-            });
-        }),
-        (bee_config.onSend = function (htmlFile) {
-            jQuery('#downloadBTN').unbind('click').click(function () {
-                event.preventDefault();
-                var nomeArquivo = document.getElementById('nomeArquivo')
-                    .value;
-                var slug = document.getElementById('slugArquivo').value;
-                if (slug !== 'comece-do-zero') {
-                    var zip = new JSZip();
-                    zip.file(nomeArquivo + '.html', htmlFile);
-                    zip.generateAsync({
-                        type: 'blob',
-                    }).then(
-                        function (content) {
-                            jQuery('body').toast({
-                                position: 'top left _margin-top-3-100',
-                                message: 'O download iniciará em breve.',
-                                displayTime: 5000,
-                                class: 'inverted green',
-                                showProgress: 'bottom',
-                            });
-                            saveAs(content, nomeArquivo + '.zip');
-                        },
-                        function (e) {
-                            jQuery('body').toast({
-                                position: 'top left _margin-top-3-100',
-                                message: e,
-                                displayTime: 5000,
-                                class: 'inverted red',
-                                showProgress: 'bottom',
-                            });
-                        }
-                    );
-                } else {
-                    jQuery('body').toast({
-                        position: 'top left _margin-top-3-100',
-                        message: 'Você não pode baixar um template vazio.',
-                        displayTime: 5000,
-                        class: 'inverted red',
-                        showProgress: 'bottom',
-                    });
-                }
-            });
+                    }
+                });
             /*
 				var contatos = document.getElementById('enderecoEnvio')
 					.value;
@@ -385,7 +422,7 @@ function BeeApp(token, bee_config, beetemplates) {
         };
 
         this.useTemplate = function (template) {
-            template = JSON.parse(template);
+            //template = JSON.parse(template);
             this.template = template;
         };
 

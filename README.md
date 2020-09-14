@@ -10,6 +10,13 @@
 
 ## Changelog
 
+`0.11.1`
+
+- bug fixes on hgodbee-ajax.php
+- bug fixes on bee-app.js
+- acrescimo do botão de action na navbar
+- remocao do json_encode no bee-plugin-starter.php
+
 `0.11.0`
 
 - migracao

@@ -372,8 +372,23 @@ function hgodbee_save_new() {
 		);
 		print wp_json_encode( $response );
 	}
-	delete_transient( 'emakbee_autosave' );
-	delete_transient( 'emakbee_user' );
+
+	if ( true === HB_DEBUG ) {
+		$debug = array(
+			'nonce'        => $nonce,
+			'categories'   => $categories,
+			'tags'         => $tags,
+			'json'         => $json_template,
+
+			'saved'        => $saved,
+			'saved_html'   => $saved_html,
+			'term_related' => $term_related,
+			'tag_related'  => $tag_related,
+			'response'     => $response,
+		);
+		HGodBee::hb_log( $debug, 'debug', __CLASS__, __METHOD__, __LINE__ );
+	}
+
 	wp_die();
 }
 
@@ -452,8 +467,8 @@ function hgodbee_save_colors() {
  * @return void
  */
 function hgodbee_save_template_star_button() {
-	HGodBee::hb_log(HB_PREFIX . 'star', 'nonce', __CLASS__, __METHOD__, __LINE__);
 	$nonce = check_ajax_referer( HB_PREFIX . 'star', 'nonce' );
+
 	$id    = $_POST['id'];
 	$value = $_POST['value'];
 
@@ -464,10 +479,10 @@ function hgodbee_save_template_star_button() {
 
 	$is_template = get_post_meta( $id, HB_PREFIX . 'is_template', true );
 
-	if ( 1 === int_val( $value ) ) {
+	if ( 1 === intval($value) ) {
 		$insert = 1;
 	}
-	if ( 0 === int_val( $value ) ) {
+	if ( 0 === intval($value) ) {
 		$insert = 0;
 	}
 	$template = update_post_meta( $id, HB_PREFIX . 'is_template', $insert );

@@ -46,6 +46,7 @@ function hgobee_navbar() {
 	?>
 <div id="bee-plugin-navigation-button-group" class="ui vertical icon buttons hgodbee-navbar" role="group"
 	aria-label="buton group">
+	<?php hgodbee_navbar_button( '', $action_link, $action_classes, $action_tooltip, $action_icon ); ?>
 	<?php hgodbee_navbar_button( '', 'javascript:void(0)', 'teal cores', 'Cores', 'sliders' ); ?>
 	<?php hgodbee_navbar_button( '', $templates_url, 'violet', 'Templates', 'archive' ); ?>
 	<?php hgodbee_navbar_button( '', 'javascript:void(0)', 'pink download', 'Download', 'download' ); ?>
