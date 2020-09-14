@@ -385,7 +385,7 @@ function BeeApp(token, bee_config, beetemplates) {
         };
 
         this.useTemplate = function (template) {
-            //template = JSON.parse(template);
+            template = JSON.parse(template);
             this.template = template;
         };
 

@@ -10,9 +10,13 @@
 
 ## Changelog
 
+`0.11.0`
+
+- migracao
+
 `0.10.4`
 
-- mudanas pequenas
+- mudancas pequenas
 
 `0.10.3`
 
